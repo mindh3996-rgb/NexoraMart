@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Edit Profile</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body>
+
+<div class="container mt-5">
+
+    <div class="card shadow p-4">
+
+        <h2 class="text-center mb-4">
+            Edit Profile
+        </h2>
+
+        <form method="POST">
+            {% csrf_token %}
+
+            <div class="mb-3">
+                <label class="form-label">Full Name</label>
+                <input
+                    type="text"
+                    name="full_name"
+                    class="form-control"
+                    value="{{ profile.full_name }}"
+                    required
+                >
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Phone</label>
+                <input
+                    type="text"
+                    name="phone"
+                    class="form-control"
+                    value="{{ profile.phone }}"
+                    required
+                >
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">City</label>
+                <input
+                    type="text"
+                    name="city"
+                    class="form-control"
+                    value="{{ profile.city }}"
+                    required
+                >
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Address</label>
+                <textarea
+                    name="address"
+                    class="form-control"
+                    rows="4"
+                    required
+                >{{ profile.address }}</textarea>
+            </div>
+
+            <button type="submit" class="btn btn-success">
+                Save Changes
+            </button>
+
+            <a href="{% url 'profile' %}" class="btn btn-secondary">
+                Cancel
+            </a>
+
+        </form>
+
+    </div>
+
+</div>
+
+</body>
+</html>

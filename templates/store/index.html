@@ -1,0 +1,256 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Nexora Mart</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<!-- NavBar section -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+
+<div class="container">
+    
+
+    <a class="navbar-brand d-flex align-items-center" href="/">
+        <img src="{% static 'images/logo2.png' %}"
+             width="45"
+             height="45"
+             class="me-2">
+
+        <span class="fw-bold fs-4">Nexora Mart</span>
+    </a>
+
+    <button class="navbar-toggler"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#menu">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+     
+    <div class="collapse navbar-collapse" id="menu">
+
+        <!-- YAHAN YE UL LAGAO -->
+        <ul class="navbar-nav me-auto">
+
+            <li class="nav-item">
+                <a class="nav-link" href="/">Home</a>
+            </li>
+
+            <li class="nav-item">
+    <a class="nav-link" href="#featured-products">
+        Products
+    </a>
+</li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="#categories">Categories</a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'contact' %}">
+                 Contact
+             </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'cart' %}">
+                    🛒 Cart
+                </a>
+            </li>
+            <li class="nav-item">
+    <a class="nav-link" href="{% url 'wishlist' %}">
+        ❤️ Wishlist
+    </a>
+</li>
+
+            {% if user.is_authenticated %}
+
+               <li class="nav-item dropdown">
+
+    <a class="nav-link dropdown-toggle"
+       href="#"
+       role="button"
+       data-bs-toggle="dropdown">
+
+        👤 {{ user.username }}
+
+    </a>
+
+    <ul class="dropdown-menu dropdown-menu-end">
+
+        <li>
+           <a class="dropdown-item" href="{% url 'profile' %}">
+    My Profile
+</a>
+        </li>
+
+        <li>
+            <a class="dropdown-item" href="{% url 'my_orders' %}">
+    My Orders
+</a>
+        </li>
+
+        <li><hr class="dropdown-divider"></li>
+ {% if user.is_staff %}
+
+<li>
+    <a class="dropdown-item text-warning"
+       href="{% url 'dashboard' %}">
+        📊 Admin Dashboard
+    </a>
+</li>
+
+{% endif %}
+        <li>
+            <a class="dropdown-item text-danger"
+               href="{% url 'logout' %}">
+                Logout
+            </a>
+        </li>
+
+    </ul>
+
+</li>
+
+            {% else %}
+
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'login' %}">
+                        Login
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'signup' %}">
+                        Signup
+                    </a>
+                </li>
+
+            {% endif %}
+
+        </ul>
+      <form class="d-flex ms-3" method="GET" action="/">
+    <input
+        class="form-control me-2"
+        type="search"
+        name="search"
+        placeholder="Search products..."
+        value="{{ request.GET.search }}"
+    >
+
+    <button class="btn btn-outline-light" type="submit">
+        Search
+    </button>
+</form>
+
+    </div>
+
+</div>
+
+
+
+</nav>
+<!-- Hero Section -->
+<section class="container py-5" id="products">
+    <div class="row align-items-center">
+
+        <div class="col-md-6">
+            <h1 class="display-4 fw-bold">
+                Nexora Mart
+            </h1>
+
+            <p class="lead mt-3">
+                Elevate Your Everyday Look with Fashion You'll Love.
+            </p>
+
+           <a href="#featured-products" class="btn btn-primary btn-lg mt-3">
+    Shop Now
+</a>
+        </div>
+
+        <div class="col-md-6 text-center">
+            <img src="{% static 'images/img.png' %}"
+     class="img-fluid"
+     style="max-height:450px; width:auto;"
+     alt="Logo">
+        </div>
+
+    </div>
+</section>
+<div class="container mb-4" id="categories">
+
+    <h4 class="mb-3">Categories</h4>
+
+    <a href="/" class="btn btn-dark mb-2">All Products</a>
+
+    {% for category in categories %}
+
+<a href="/?category={{ category.id }}"
+   class="btn mb-2 
+   {% if request.GET.category == category.id|stringformat:'s' %}
+       btn-primary
+   {% else %}
+       btn-outline-primary
+   {% endif %}
+   ">
+    {{ category.name }}
+</a>
+
+{% endfor %}
+
+</div>
+<section class="container py-5" id="featured-products">
+
+    <h2 class="text-center fw-bold mb-5">
+        Featured Products
+    </h2>
+
+    <div class="row">
+
+        {% for product in products %}
+
+        <div class="col-md-4 mb-4">
+            <div class="card shadow h-100">
+
+               <a href="{% url 'product_detail' product.id %}">
+    <img src="{{ product.image.url }}"
+         class="card-img-top"
+         style="height:250px; object-fit:contain; background:#fff; padding:10px;"
+         alt="{{ product.name }}">
+                </a>
+
+                <div class="card-body text-center">
+                  <h5>{{ product.name }}</h5>
+
+<p class="text-muted">
+    Category: {{ product.category }}
+</p>
+
+<p class="text-primary fw-bold">
+    Rs{{ product.price }}
+</p>
+                  <a href="{% url 'add_to_cart' product.id %}" class="btn btn-dark">
+    Add to Cart
+</a>
+                </div>
+
+            </div>
+        </div>
+
+        {% endfor %}
+
+    </div>
+
+</section>
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>
