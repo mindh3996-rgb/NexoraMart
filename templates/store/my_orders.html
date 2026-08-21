@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>My Orders - Nexora Mart</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
+            padding: 30px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #222;
+        }
+
+        .order-card {
+            background: white;
+            width: 80%;
+            margin: 20px auto;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 10px;
+        }
+
+        .status {
+            padding: 5px 12px;
+            border-radius: 20px;
+            background: #ffc107;
+            color: white;
+            font-weight: bold;
+        }
+
+        .product {
+            margin-top: 15px;
+            padding: 10px;
+            background: #fafafa;
+            border-radius: 5px;
+        }
+
+        .empty {
+            text-align: center;
+            color: gray;
+            font-size: 18px;
+        }
+
+        .back-btn {
+            display: block;
+            width: 150px;
+            margin: 20px auto;
+            text-align: center;
+            padding: 10px;
+            background: #111;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<h1>My Orders</h1>
+
+
+{% if orders %}
+
+    {% for order in orders %}
+
+    <div class="order-card">
+
+      <div class="order-header">
+
+    <div>
+        <h3>Order #{{ order.id }}</h3>
+        <p>Date: {{ order.created_at }}</p>
+    </div>
+
+    <div>
+
+        {% if order.status == "Pending" %}
+            <span class="status" style="background:#ffc107;">
+                Pending
+            </span>
+
+        {% elif order.status == "Processing" %}
+            <span class="status" style="background:#0d6efd;">
+                Processing
+            </span>
+
+        {% elif order.status == "Shipped" %}
+            <span class="status" style="background:#0dcaf0;">
+                Shipped
+            </span>
+
+        {% elif order.status == "Delivered" %}
+            <span class="status" style="background:#198754;">
+                Delivered
+            </span>
+
+        {% else %}
+            <span class="status" style="background:#dc3545;">
+                Cancelled
+            </span>
+
+        {% endif %}
+
+    </div>
+
+</div>
+   
+
+        <h4>Customer Details</h4>
+
+        <p>
+            Name: {{ order.customer_name }}
+        </p>
+
+        <p>
+            City: {{ order.city }}
+        </p>
+
+
+        <h4>Products</h4>
+
+        {% for item in order.items.all %}
+
+        <div class="product">
+
+            <b>{{ item.product.name }}</b>
+
+            <br>
+
+            Quantity:
+            {{ item.quantity }}
+
+            <br>
+
+            Price:
+            Rs {{ item.price }}
+
+        </div>
+
+        {% endfor %}
+
+
+        <h3>
+            Total:
+            Rs {{ order.total_amount }}
+        </h3>
+
+        <a href="{% url 'download_invoice' order.id %}"
+   class="back-btn"
+   style="display:inline-block; width:auto; margin-top:15px;">
+    Download Invoice PDF
+</a>
+
+    </div>
+
+    {% endfor %}
+
+
+{% else %}
+
+<p class="empty">
+    You have no orders yet.
+</p>
+
+{% endif %}
+
+
+
+<a href="/" class="back-btn">
+    Continue Shopping
+</a>
+
+
+
+</body>
+</html>

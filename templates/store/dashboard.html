@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Dashboard</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+<div class="container py-5">
+    {% if messages %}
+    {% for message in messages %}
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    {% endfor %}
+{% endif %}
+
+    <h2 class="text-center mb-5">
+        📊 Admin Dashboard
+    </h2>
+    <a href="{% url 'product_list' %}" class="btn btn-primary mb-4">
+    🛒 Manage Products
+</a>
+
+    <div class="row g-4">
+
+        <div class="col-md-4">
+            <div class="card shadow text-center p-4">
+                <h5>Total Orders</h5>
+                <h2>{{ total_orders }}</h2>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow text-center p-4">
+                <h5>Total Sales</h5>
+                <h2>Rs {{ total_sales }}</h2>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow text-center p-4">
+                <h5>Total Customers</h5>
+                <h2>{{ total_customers }}</h2>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow text-center p-4">
+                <h5>Total Products</h5>
+                <h2>{{ total_products }}</h2>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow text-center p-4">
+                <h5>Total Wishlist</h5>
+                <h2>{{ total_wishlist }}</h2>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow text-center p-4">
+                <h5>Total Reviews</h5>
+                <h2>{{ total_reviews }}</h2>
+            </div>
+        </div>
+    
+</div>
+   
+<hr class="my-5">
+
+<div class="card shadow p-4">
+
+    <h3 class="mb-4">
+        Website Analytics
+    </h3>
+
+    <canvas id="salesChart"></canvas>
+<hr class="my-5">
+
+<h3 class="mb-4">
+    📅 Monthly Sales
+</h3>
+
+<canvas id="monthlyChart"></canvas>
+</div>
+<hr class="my-5">
+
+<div class="card shadow p-4">
+
+    <h3 class="mb-4">
+        🏆 Top 5 Best Selling Products
+    </h3>
+
+    <table class="table table-striped">
+
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Product Name</th>
+                <th>Sold</th>
+            </tr>
+        </thead>
+
+        <tbody>
+
+        {% for product in best_products %}
+
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ product.name }}</td>
+                <td>{{ product.total_sold }}</td>
+            </tr>
+
+        {% empty %}
+
+            <tr>
+                <td colspan="3" class="text-center">
+                    No sales yet.
+                </td>
+            </tr>
+
+        {% endfor %}
+
+        </tbody>
+
+    </table>
+
+</div>
+<hr class="my-5">
+
+<div class="card shadow p-4">
+
+    <h3 class="mb-4">
+        🕒 Recent Orders
+    </h3>
+   
+    <table class="table table-bordered table-hover">
+
+        <thead class="table-dark">
+            <tr>
+                <th>Order ID</th>
+                <th>Customer</th>
+                <th>City</th>
+                <th>Total</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+
+        <tbody>
+
+        {% for order in recent_orders %}
+
+            <tr>
+                <td>#{{ order.id }}</td>
+                <td>{{ order.customer_name }}</td>
+                <td>{{ order.city }}</td>
+                <td>Rs {{ order.total_amount }}</td>
+                <td>
+    <form method="POST" action="{% url 'update_order_status' order.id %}">
+        {% csrf_token %}
+
+        <select name="status" class="form-select form-select-sm">
+            <option value="Pending" {% if order.status == "Pending" %}selected{% endif %}>Pending</option>
+            <option value="Processing" {% if order.status == "Processing" %}selected{% endif %}>Processing</option>
+            <option value="Shipped" {% if order.status == "Shipped" %}selected{% endif %}>Shipped</option>
+            <option value="Delivered" {% if order.status == "Delivered" %}selected{% endif %}>Delivered</option>
+            <option value="Cancelled" {% if order.status == "Cancelled" %}selected{% endif %}>Cancelled</option>
+        </select>
+
+        <button type="submit" class="btn btn-success btn-sm mt-2">
+            Update
+        </button>
+    </form>
+</td>
+        {% empty %}
+
+            <tr>
+                <td colspan="5" class="text-center">
+                    No orders found.
+                </td>
+            </tr>
+
+        {% endfor %}
+
+        </tbody>
+
+    </table>
+
+</div>
+<hr class="my-5">
+
+<div class="card shadow p-4">
+
+    <h3 class="mb-4">
+        ⭐ Recent Reviews
+    </h3>
+
+    <table class="table table-striped">
+
+        <thead class="table-dark">
+            <tr>
+                <th>User</th>
+                <th>Product</th>
+                <th>Rating</th>
+                <th>Comment</th>
+            </tr>
+        </thead>
+
+        <tbody>
+
+        {% for review in recent_reviews %}
+
+        <tr>
+            <td>{{ review.user.username }}</td>
+            <td>{{ review.product.name }}</td>
+            <td>⭐ {{ review.rating }}/5</td>
+            <td>{{ review.comment|truncatechars:40 }}</td>
+        </tr>
+
+        {% empty %}
+
+        <tr>
+            <td colspan="4" class="text-center">
+                No reviews yet.
+            </td>
+        </tr>
+
+        {% endfor %}
+
+        </tbody>
+
+    </table>
+    <hr class="my-5">
+
+<div class="card shadow p-4">
+
+    <h3 class="mb-4">
+        👑 Top Customers
+    </h3>
+
+    <table class="table table-striped">
+
+        <thead class="table-dark">
+            <tr>
+                <th>#</th>
+                <th>Username</th>
+                <th>Total Orders</th>
+                <th>Total Spent</th>
+            </tr>
+        </thead>
+
+        <tbody>
+
+        {% for customer in top_customers %}
+
+        <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>{{ customer.username }}</td>
+            <td>{{ customer.total_orders|default:0 }}</td>
+            <td>Rs {{ customer.total_spent|default:0 }}</td>
+        </tr>
+
+        {% empty %}
+
+        <tr>
+            <td colspan="4" class="text-center">
+                No customers found.
+            </td>
+        </tr>
+
+        {% endfor %}
+
+        </tbody>
+
+    </table>
+
+</div>
+
+</div>
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+
+const labels = JSON.parse('{{ sales_labels|escapejs }}');
+const data = JSON.parse('{{ sales_data|escapejs }}');
+
+new Chart(document.getElementById("salesChart"), {
+
+
+    type: "bar",
+
+    data: {
+
+        labels: labels,
+
+        datasets: [{
+
+            label: "Website Statistics",
+
+            data: data,
+
+            borderWidth: 1
+
+        }]
+
+    },
+
+    options: {
+
+        responsive: true,
+
+        scales: {
+
+            y: {
+                beginAtZero: true
+            }
+
+        }
+
+    }
+
+});
+const monthlyLabels = JSON.parse('{{ monthly_labels|escapejs }}');
+const monthlyData = JSON.parse('{{ monthly_data|escapejs }}');
+
+new Chart(document.getElementById("monthlyChart"), {
+
+    type: "line",
+
+    data: {
+
+        labels: monthlyLabels,
+
+        datasets: [{
+
+            label: "Monthly Sales",
+
+            data: monthlyData,
+
+            borderWidth: 3,
+
+            fill: false,
+
+            tension: 0.3
+
+        }]
+
+    },
+
+    options: {
+
+        responsive: true,
+
+        scales: {
+
+            y: {
+                beginAtZero: true
+            }
+
+        }
+
+    }
+
+});
+
+
+</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
