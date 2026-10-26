@@ -312,10 +312,23 @@ class Coupon(models.Model):
 class MenuItem(models.Model):
     title = models.CharField(max_length=100)
     url = models.CharField(max_length=255, blank=True)
+
     parent = models.ForeignKey(
-        "self", on_delete=models.CASCADE,
-        null=True, blank=True, related_name="children"
+        "self",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="children"
     )
+
+    category = models.ForeignKey(
+        Category,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="menu_items"
+    )
+
     order = models.PositiveIntegerField(default=0)
     is_active = models.BooleanField(default=True)
 
@@ -499,3 +512,17 @@ from .models import WebsiteTheme
 class WebsiteThemeAdmin(admin.ModelAdmin):
     list_display = ("name", "theme_type", "is_active")
     list_editable = ("is_active",)
+   
+class ProductGridSettings(models.Model):
+    desktop_columns = models.PositiveSmallIntegerField(default=4)
+    tablet_columns = models.PositiveSmallIntegerField(default=3)
+    mobile_columns = models.PositiveSmallIntegerField(default=2)
+    image_height = models.PositiveIntegerField(default=240)
+    card_gap = models.PositiveIntegerField(default=20)
+    card_padding = models.PositiveIntegerField(default=12)
+    card_radius = models.PositiveIntegerField(default=12)
+    title_font_size = models.PositiveIntegerField(default=16)
+    price_font_size = models.PositiveIntegerField(default=16)
+
+    def __str__(self):
+        return "Product Grid Settings"

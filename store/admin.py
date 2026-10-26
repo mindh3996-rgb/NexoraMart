@@ -6,6 +6,8 @@ from .models import ProductVariant
 from .models import Coupon
 from reportlab.pdfgen import canvas
 from .models import Product, ProductImage, Category, Cart, Order, OrderItem, Profile, Wishlist, Review
+from .models import ProductGridSettings
+
 
 # =========================
 # Export to Excel
@@ -98,7 +100,10 @@ class ProductAdmin(admin.ModelAdmin):
 
 
 # 👇 Ye line class ke bahar hogi
-admin.site.register(Category)
+@admin.register(Category)
+class CategoryAdmin(admin.ModelAdmin):
+    search_fields = ("name",)
+
 admin.site.register(Cart)
 admin.site.register(Profile)
 admin.site.register(ProductImage)
@@ -178,14 +183,13 @@ class ProductVariantAdmin(admin.ModelAdmin):
         "size",
     )
 from .models import MenuItem
-
 @admin.register(MenuItem)
 class MenuItemAdmin(admin.ModelAdmin):
-    list_display = ("title", "url", "parent", "order", "is_active")
+    list_display = ("title", "category", "url", "parent", "order", "is_active")
     list_editable = ("order", "is_active")
-    list_filter = ("is_active",)
+    list_filter = ("is_active", "category")
     search_fields = ("title",)
-
+    autocomplete_fields = ("category", "parent")
 from .models import HeroSection
 
 
@@ -258,6 +262,26 @@ class NavbarSettingsAdmin(admin.ModelAdmin):
 
     def has_add_permission(self, request):
         return not NavbarSettings.objects.exists()
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+    
+@admin.register(ProductGridSettings)
+class ProductGridSettingsAdmin(admin.ModelAdmin):
+    list_display = (
+        "desktop_columns",
+        "tablet_columns",
+        "mobile_columns",
+        "image_height",
+        "card_gap",
+        "card_padding",
+        "card_radius",
+        "title_font_size",
+        "price_font_size",
+    )
+
+    def has_add_permission(self, request):
+        return not ProductGridSettings.objects.exists()
 
     def has_delete_permission(self, request, obj=None):
         return False
