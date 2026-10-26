@@ -1,0 +1,553 @@
+ {% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Nexora Mart{% endblock %}</title>
+    <!-- base.html ke <head> ke andar ye links lagayein -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB"
+      crossorigin="anonymous">
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+    <style>
+        :root {
+            --accent: #b9a0ff;
+            --glass: rgba(255,255,255,.07);
+        }
+        * { box-sizing: border-box; }
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background: #f7f7fb;
+        }
+        main { flex: 1; }
+        .nm-navbar {
+            position: sticky;
+            top: 0;
+            z-index: 1030;
+            background: rgba(10,10,16,.94);
+            backdrop-filter: blur(18px);
+            border-bottom: 1px solid rgba(255,255,255,.12);
+            box-shadow: 0 8px 28px rgba(0,0,0,.13);
+        }
+        .nm-navbar .navbar-brand {
+            color: #fff;
+            letter-spacing: .5px;
+            transition: .3s;
+        }
+        .nm-navbar .navbar-brand:hover {
+            color: var(--accent);
+            transform: translateY(-2px);
+        }
+        .nm-logo {
+            width: 43px;
+            height: 43px;
+            object-fit: contain;
+            border-radius: 12px;
+        }
+        .nm-navbar .nav-link {
+            position: relative;
+            color: #f4f4f7;
+            font-weight: 500;
+            padding: 12px 11px !important;
+            transition: color .3s, transform .3s;
+        }
+        .nm-navbar .nav-link::after {
+            content: "";
+            position: absolute;
+            left: 10px;
+            right: 10px;
+            bottom: 5px;
+            height: 2px;
+            background: var(--accent);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform .3s ease;
+        }
+        .nm-navbar .nav-link:hover {
+            color: var(--accent);
+            transform: translateY(-2px);
+        }
+        .nm-navbar .nav-link:hover::after,
+        .nm-navbar .nav-link:focus-visible::after {
+            transform: scaleX(1);
+        }
+        .nm-icons { display: flex; align-items: center; gap: 8px; }
+        .nm-icon {
+            width: 41px;
+            height: 41px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            text-decoration: none;
+            border: 1px solid rgba(255,255,255,.16);
+            border-radius: 13px;
+            background: var(--glass);
+            transition: .3s ease;
+        }
+        .nm-icon:hover {
+            color: #111;
+            background: var(--accent);
+            border-color: var(--accent);
+            transform: translateY(-3px) rotate(-3deg);
+            box-shadow: 0 6px 18px rgba(185,160,255,.22);
+        }
+        .nm-search {
+            display: flex;
+            align-items: center;
+            border: 1px solid rgba(255,255,255,.2);
+            border-radius: 14px;
+            overflow: hidden;
+            background: var(--glass);
+        }
+        .nm-search input {
+            width: 150px;
+            color: white;
+            background: transparent;
+            border: 0;
+            box-shadow: none !important;
+        }
+        .nm-search input::placeholder { color: #c5c5cf; }
+        .nm-search button {
+            color: white;
+            border: 0;
+            padding: 10px 13px;
+            background: transparent;
+        }
+        .nm-search button:hover { color: var(--accent); }
+        .nm-navbar .dropdown-menu {
+            background: #171720;
+            border: 1px solid #353542;
+            border-radius: 14px;
+            padding: 8px;
+            box-shadow: 0 15px 35px #0003;
+        }
+        .nm-navbar .dropdown-item {
+            color: #f4f4f7;
+            padding: 10px 13px;
+            border-radius: 8px;
+            transition: .2s;
+        }
+        .nm-navbar .dropdown-item:hover {
+            background: rgba(185,160,255,.15);
+            color: var(--accent);
+            padding-left: 18px;
+        }
+        .nm-toggler { border-color: #777 !important; }
+        .nm-footer {
+            position: relative;
+            overflow: hidden;
+            margin-top: 60px;
+            color: #e8e8ef;
+            background: #0a0a10;
+            border-top: 1px solid rgba(185,160,255,.35);
+        }
+        .nm-footer::before {
+            content: "";
+            position: absolute;
+            top: -100px;
+            left: 35%;
+            width: 280px;
+            height: 180px;
+            background: rgba(145,105,255,.12);
+            filter: blur(65px);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+        .nm-footer h5, .nm-footer h6 { color: #fff; }
+        .nm-footer .footer-link {
+            display: inline-block;
+            color: #bdbdc9;
+            text-decoration: none;
+            margin: 5px 0;
+            transition: .25s;
+        }
+        .nm-footer .footer-link:hover {
+            color: var(--accent);
+            transform: translateX(4px);
+        }
+        .nm-footer .social-link {
+            width: 39px;
+            height: 39px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin: 4px;
+            border: 1px solid #343441;
+            border-radius: 12px;
+            color: white;
+            text-decoration: none;
+            transition: .3s;
+        }
+        .nm-footer .social-link:hover {
+            background: var(--accent);
+            color: #111;
+            transform: translateY(-4px);
+        }
+        .nm-footer-bottom {
+            border-top: 1px solid #292933;
+            color: #a7a7b5;
+        }
+        @media (max-width: 991.98px) {
+            .nm-navbar .navbar-collapse {
+                padding: 12px 0 18px;
+            }
+            .nm-navbar .nav-link { padding: 10px 4px !important; }
+            .nm-navbar .nav-link::after { left: 4px; right: auto; width: 45px; }
+            .nm-icons { margin-top: 12px; }
+            .nm-search { margin-top: 12px; }
+            .nm-search input { width: 100%; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: .01ms !important;
+                transition-duration: .01ms !important;
+            }
+        }
+        
+/* Editable Nexora Mart Navbar */
+.nm-navbar {
+    background: var(--nm-nav-bg, rgba(10,10,16,.94));
+    backdrop-filter: blur(var(--nm-blur, 18px));
+    -webkit-backdrop-filter: blur(var(--nm-blur, 18px));
+    border-bottom: 1px solid var(--nm-border, rgba(255,255,255,.12));
+    box-shadow: var(--nm-shadow, 0 8px 28px rgba(0,0,0,.13));
+}
+.nm-navbar .nav-link {
+    color: var(--nm-menu-color, #f4f4f7);
+    font-size: var(--nm-menu-size, 15px);
+    border-radius: var(--nm-radius, 12px);
+}
+.nm-navbar .nav-link:hover {
+    color: var(--nm-hover, #b9a0ff);
+    background: var(--nm-menu-bg, transparent);
+}
+.nm-navbar .navbar-brand:hover { color: var(--nm-hover, #b9a0ff); }
+.nm-navbar .nm-icon {
+    width: var(--nm-icon-size, 41px);
+    height: var(--nm-icon-size, 41px);
+    color: var(--nm-icon-color, #fff);
+    background: var(--nm-icon-bg, rgba(255,255,255,.07));
+}
+.nm-navbar .nm-icon:hover {
+    color: var(--nm-icon-hover, #111);
+    background: var(--nm-icon-hover-bg, #b9a0ff);
+}
+.nm-navbar .nm-search {
+    background: var(--nm-search-bg, rgba(255,255,255,.07));
+    border-color: var(--nm-search-border, rgba(255,255,255,.2));
+    border-radius: var(--nm-search-radius, 14px);
+}
+.nm-navbar .nm-search input {
+    width: var(--nm-search-width, 150px);
+    color: var(--nm-search-text, #fff);
+}
+.nm-logo { animation-duration: var(--nm-animation-speed, 1s); }
+.nm-logo.anim-rotate { animation: nmRotate 4s linear infinite; }
+.nm-logo.anim-zoom { animation: nmZoom 2s ease-in-out infinite alternate; }
+.nm-logo.anim-pulse { animation: nmPulse 1.5s ease-in-out infinite; }
+.nm-logo.anim-flip { animation: nmFlip 3s ease-in-out infinite; }
+.nm-logo.anim-bounce { animation: nmBounce 1.5s ease-in-out infinite; }
+.nm-logo.anim-float { animation: nmFloat 2s ease-in-out infinite; }
+.nm-logo.anim-shake:hover { animation: nmShake .5s ease-in-out; }
+
+@keyframes nmRotate { to { transform: rotate(360deg); } }
+@keyframes nmZoom { to { transform: scale(1.12); } }
+@keyframes nmPulse { 50% { transform: scale(1.1); } }
+@keyframes nmFlip { 50% { transform: rotateY(180deg); } }
+@keyframes nmBounce { 50% { transform: translateY(-6px); } }
+@keyframes nmFloat { 50% { transform: translateY(-4px); } }
+@keyframes nmShake {
+    25% { transform: rotate(-8deg); }
+    75% { transform: rotate(8deg); }
+}
+.nm-navbar.morphism-clay {
+    box-shadow: 5px 5px 12px #0005, -3px -3px 10px #ffffff12;
+}
+.nm-navbar.morphism-neumorphism {
+    box-shadow: 5px 5px 12px #0005, -5px -5px 12px #ffffff12;
+}
+.nm-navbar.menu-style-button .nav-link,
+.nm-navbar.menu-style-glass .nav-link,
+.nm-navbar.menu-style-clay .nav-link {
+    margin: 3px;
+    padding: 9px 13px !important;
+}
+.nm-navbar.menu-style-glass .nav-link {
+    background: rgba(255,255,255,.08);
+    border: 1px solid rgba(255,255,255,.12);
+    backdrop-filter: blur(10px);
+}
+.nm-navbar.menu-style-clay .nav-link {
+    background: var(--nm-menu-bg, #252535);
+    box-shadow: 3px 3px 7px #0004, -2px -2px 5px #ffffff10;
+}
+.nm-navbar.menu-style-text .nav-link::after { display: none; }
+.nm-navbar.menu-style-button .nav-link { background: var(--nm-menu-bg, #252535); }
+.nm-navbar.menu-style-underline .nav-link::after {
+    background: var(--nm-underline, #b9a0ff);
+}
+.nm-navbar .navbar-brand.logo-center {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+}
+.nm-navbar .navbar-brand.logo-center:hover {
+    transform: translate(-50%, -2px);
+}
+.nm-navbar .navbar-brand.logo-right { margin-left: auto; }
+.nm-navbar .nm-icon.icon-clay {
+    box-shadow: 3px 3px 7px #0004, -2px -2px 5px #ffffff12;
+}
+.nm-navbar .nm-icon.icon-neumorphism {
+    box-shadow: inset 1px 1px 3px #ffffff15, 3px 3px 7px #0004;
+}
+@media(max-width:991.98px) {
+    .nm-navbar .navbar-brand.logo-center {
+        position: static;
+        transform: none;
+        margin-right: auto;
+    }
+    .nm-navbar .navbar-brand.logo-center:hover { transform: none; }
+    .nm-navbar .nm-search input { width: 100%; }
+}
+
+    </style>
+    {% block extra_css %}{% endblock %}
+    
+{% if website_theme %}
+<style>
+  body {
+    {% if website_theme.theme_type == "solid" %}
+      background: {{ website_theme.background_color }} !important;
+    {% elif website_theme.theme_type == "gradient" %}
+      background: linear-gradient({{ website_theme.gradient_direction }}, {{ website_theme.gradient_color_1 }}, {{ website_theme.gradient_color_2 }}) fixed !important;
+    {% elif website_theme.theme_type == "glass" %}
+      background: linear-gradient({{ website_theme.gradient_direction }}, {{ website_theme.gradient_color_1 }}, {{ website_theme.gradient_color_2 }}) fixed !important;
+    {% elif website_theme.theme_type == "clay" %}
+      background: {{ website_theme.background_color }} !important;
+    {% endif %}
+    min-height: 100vh;
+  }
+
+  {% if website_theme.theme_type == "glass" %}
+  .card, .dropdown-menu {
+    background: rgba(255,255,255,{{ website_theme.transparency|floatformat:0 }}%) !important;
+    backdrop-filter: blur({{ website_theme.blur }}px);
+    -webkit-backdrop-filter: blur({{ website_theme.blur }}px);
+    border-radius: {{ website_theme.border_radius }}px !important;
+    border: 1px solid rgba(255,255,255,.3);
+  }
+  {% elif website_theme.theme_type == "clay" %}
+  .card {
+    border-radius: {{ website_theme.border_radius }}px !important;
+    box-shadow: 8px 8px 18px rgba(0,0,0,.12), -8px -8px 18px rgba(255,255,255,.65);
+    border: none;
+  }
+  {% endif %}
+</style>
+{% endif %}
+
+</head>
+<body>
+
+
+<nav
+    class="navbar navbar-expand-lg navbar-dark nm-navbar morphism-{% if navbar_settings %}{{ navbar_settings.background_morphism }}{% else %}glass{% endif %} menu-style-{% if navbar_settings %}{{ navbar_settings.menu_style }}{% else %}underline{% endif %}"
+    style="
+    --nm-nav-bg: {% if navbar_settings %}{{ navbar_settings.background_color }}{% else %}rgba(10,10,16,.94){% endif %};
+    --nm-blur: {% if navbar_settings %}{{ navbar_settings.background_blur }}{% else %}18{% endif %}px;
+    --nm-border: {% if navbar_settings %}{{ navbar_settings.border_color }}{% else %}rgba(255,255,255,.12){% endif %};
+    --nm-menu-color: {% if navbar_settings %}{{ navbar_settings.menu_text_color }}{% else %}#f4f4f7{% endif %};
+    --nm-hover: {% if navbar_settings %}{{ navbar_settings.menu_hover_color }}{% else %}#b9a0ff{% endif %};
+    --nm-menu-bg: {% if navbar_settings %}{{ navbar_settings.menu_background_color }}{% else %}#252535{% endif %};
+    --nm-menu-size: {% if navbar_settings %}{{ navbar_settings.menu_font_size }}{% else %}15{% endif %}px;
+    --nm-radius: {% if navbar_settings %}{{ navbar_settings.menu_border_radius }}{% else %}12{% endif %}px;
+    --nm-underline: {% if navbar_settings %}{{ navbar_settings.menu_underline_color }}{% else %}#b9a0ff{% endif %};
+    --nm-icon-size: {% if navbar_settings %}{{ navbar_settings.icon_size }}{% else %}41{% endif %}px;
+    --nm-icon-color: {% if navbar_settings %}{{ navbar_settings.icon_color }}{% else %}#fff{% endif %};
+    --nm-icon-hover: {% if navbar_settings %}{{ navbar_settings.icon_hover_color }}{% else %}#111{% endif %};
+    --nm-icon-bg: {% if navbar_settings %}{{ navbar_settings.icon_background }}{% else %}#252535{% endif %};
+    --nm-icon-hover-bg: {% if navbar_settings %}{{ navbar_settings.icon_hover_background }}{% else %}#b9a0ff{% endif %};
+    --nm-search-width: {% if navbar_settings %}{{ navbar_settings.search_width }}{% else %}150{% endif %}px;
+    --nm-search-bg: {% if navbar_settings %}{{ navbar_settings.search_background }}{% else %}#252535{% endif %};
+    --nm-search-text: {% if navbar_settings %}{{ navbar_settings.search_text_color }}{% else %}#fff{% endif %};
+    --nm-search-border: {% if navbar_settings %}{{ navbar_settings.search_border_color }}{% else %}#555566{% endif %};
+    --nm-search-radius: {% if navbar_settings %}{{ navbar_settings.search_border_radius }}{% else %}14{% endif %}px;
+    --nm-animation-speed: {% if navbar_settings %}{{ navbar_settings.animation_speed }}{% else %}1{% endif %}s;
+    {% if navbar_settings and navbar_settings.shadow_enabled %}box-shadow: 0 8px 28px #0003;{% endif %}
+    {% if navbar_settings and navbar_settings.sticky_header %}position: sticky; top: 0;{% else %}position: relative;{% endif %}
+    {% if navbar_settings and navbar_settings.background_gradient %}background: linear-gradient(120deg, {{ navbar_settings.gradient_start }}, {{ navbar_settings.gradient_end }});{% endif %}
+    {% if navbar_settings and navbar_settings.background_morphism == 'glass' %}background: color-mix(in srgb, {{ navbar_settings.background_color }} {{ navbar_settings.background_opacity }}%, transparent);{% endif %}
+">
+    <div class="container position-relative">
+        <a class="navbar-brand d-flex align-items-center gap-2
+            {% if navbar_settings %}logo-{{ navbar_settings.logo_alignment }}{% endif %}"
+           href="/">
+            {% if navbar_settings and navbar_settings.logo %}
+                <img src="{{ navbar_settings.logo.url }}"
+                     class="nm-logo anim-{{ navbar_settings.logo_animation }}"
+                     style="width:{{ navbar_settings.logo_width }}px;height:{{ navbar_settings.logo_height }}px;object-fit:contain"
+                     alt="{{ navbar_settings.brand_name }}">
+            {% else %}
+                <img src="{% static 'images/logo2.png' %}"
+                     class="nm-logo {% if navbar_settings %}anim-{{ navbar_settings.logo_animation }}{% endif %}"
+                     style="width:{% if navbar_settings %}{{ navbar_settings.logo_width }}{% else %}43{% endif %}px;height:{% if navbar_settings %}{{ navbar_settings.logo_height }}{% else %}43{% endif %}px;object-fit:contain"
+                     alt="Nexora Mart">
+            {% endif %}
+            {% if not navbar_settings or navbar_settings.show_brand_name %}
+                <span class="fw-bold fs-4">
+                    {% if navbar_settings %}{{ navbar_settings.brand_name }}{% else %}Nexora Mart{% endif %}
+                </span>
+            {% endif %}
+        </a>
+
+        <button class="navbar-toggler nm-toggler" type="button"
+                data-bs-toggle="collapse" data-bs-target="#nmMenu"
+                aria-controls="nmMenu" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="nmMenu">
+            <ul class="navbar-nav mx-lg-auto align-items-lg-center">
+                {% for item in navbar_menus %}
+                <li class="nav-item {% if item.children.all %}dropdown{% endif %}">
+                    {% if item.children.all %}
+                    <a class="nav-link dropdown-toggle" href="{{ item.url|default:'#' }}"
+                       data-bs-toggle="dropdown" aria-expanded="false">{{ item.title }}</a>
+                    <ul class="dropdown-menu">
+                        {% for child in item.children.all %}
+                            {% if child.is_active %}
+                            <li><a class="dropdown-item" href="{{ child.url|default:'#' }}">{{ child.title }}</a></li>
+                            {% endif %}
+                        {% endfor %}
+                    </ul>
+                    {% else %}
+                    <a class="nav-link" href="{{ item.url|default:'#' }}">{{ item.title }}</a>
+                    {% endif %}
+                </li>
+                {% endfor %}
+
+                {% if not navbar_settings or navbar_settings.show_contact %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'contact' %}">Contact</a>
+                </li>
+                {% endif %}
+
+                {% if user.is_authenticated %}
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+                        <i class="fa-regular fa-user me-1"></i>{{ user.username }}
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" href="{% url 'profile' %}">My Profile</a></li>
+                        <li><a class="dropdown-item" href="{% url 'my_orders' %}">My Orders</a></li>
+                        {% if user.is_staff %}
+                        <li><a class="dropdown-item" href="{% url 'dashboard' %}">Admin Dashboard</a></li>
+                        {% endif %}
+                        <li><a class="dropdown-item" href="{% url 'logout' %}">Logout</a></li>
+                    </ul>
+                </li>
+                {% else %}
+                <li class="nav-item"><a class="nav-link" href="{% url 'login' %}">Login</a></li>
+                <li class="nav-item"><a class="nav-link" href="{% url 'signup' %}">Signup</a></li>
+                {% endif %}
+            </ul>
+
+            <div class="nm-icons">
+                {% if not navbar_settings or navbar_settings.show_search %}
+                <form class="nm-search" method="GET" action="/">
+                    <input class="form-control" type="search" name="search"
+                           placeholder="{% if navbar_settings %}{{ navbar_settings.search_placeholder }}{% else %}Search...{% endif %}"
+                           aria-label="Search products" value="{{ request.GET.search|default:'' }}">
+                    <button type="submit" aria-label="Search"><i class="fa-solid fa-magnifying-glass"></i></button>
+                </form>
+                {% endif %}
+
+                {% if not navbar_settings or navbar_settings.show_wishlist %}
+                <a class="nm-icon {% if navbar_settings %}icon-{{ navbar_settings.icon_style }}{% endif %}"
+                   href="{% url 'wishlist' %}" title="Wishlist" aria-label="Wishlist">
+                    {% if not navbar_settings or navbar_settings.icon_display != 'text' %}<i class="fa-regular fa-heart"></i>{% endif %}
+                    {% if navbar_settings and navbar_settings.icon_display != 'icon' %}<span>Wishlist</span>{% endif %}
+                </a>
+                {% endif %}
+
+                {% if not navbar_settings or navbar_settings.show_cart %}
+                <a class="nm-icon {% if navbar_settings %}icon-{{ navbar_settings.icon_style }}{% endif %}"
+                   href="{% url 'cart' %}" title="Cart" aria-label="Cart">
+                    {% if not navbar_settings or navbar_settings.icon_display != 'text' %}<i class="fa-solid fa-bag-shopping"></i>{% endif %}
+                    {% if navbar_settings and navbar_settings.icon_display != 'icon' %}<span>Cart</span>{% endif %}
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</nav>
+
+
+{% if messages %}
+<div class="container mt-3">
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<main>
+    {% block content %}{% endblock %}
+</main>
+
+<footer class="nm-footer pt-5">
+    <div class="container position-relative">
+        <div class="row g-4 pb-4">
+            <div class="col-lg-4 col-md-6">
+                <a href="/" class="d-inline-flex align-items-center gap-2 text-decoration-none mb-3">
+                    <img src="{% static 'images/logo2.png' %}" width="42" height="42" style="object-fit:contain" alt="Nexora Mart">
+                    <span class="fs-4 fw-bold text-white">Nexora Mart</span>
+                </a>
+                <p class="text-secondary">Elevate your everyday look with styles you'll love. Discover your next favorite piece with Nexora Mart.</p>
+                <div class="mt-3">
+                    <a class="social-link" href="#" aria-label="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
+                    <a class="social-link" href="#" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
+                    <a class="social-link" href="#" aria-label="TikTok"><i class="fa-brands fa-tiktok"></i></a>
+                </div>
+            </div>
+            <div class="col-lg-2 col-md-6">
+                <h6 class="fw-bold mb-3">Quick Links</h6>
+                <a class="footer-link d-block" href="/">Home</a>
+                <a class="footer-link d-block" href="/#featured-products">Products</a>
+                <a class="footer-link d-block" href="/#categories">Categories</a>
+                <a class="footer-link d-block" href="{% url 'contact' %}">Contact Us</a>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <h6 class="fw-bold mb-3">Your Account</h6>
+                <a class="footer-link d-block" href="{% url 'profile' %}">My Profile</a>
+                <a class="footer-link d-block" href="{% url 'my_orders' %}">My Orders</a>
+                <a class="footer-link d-block" href="{% url 'wishlist' %}">My Wishlist</a>
+                <a class="footer-link d-block" href="{% url 'cart' %}">Shopping Cart</a>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <h6 class="fw-bold mb-3">Shop with Confidence</h6>
+                <p class="text-secondary small"><i class="fa-solid fa-truck-fast me-2"></i>Convenient Shopping</p>
+                <p class="text-secondary small"><i class="fa-solid fa-shield-halved me-2"></i>Secure Checkout</p>
+                <p class="text-secondary small"><i class="fa-solid fa-heart me-2"></i>Made for Your Style</p>
+            </div>
+        </div>
+        <div class="nm-footer-bottom py-3 text-center small">
+            &copy; {% now "Y" %} Nexora Mart. All rights reserved.
+        </div>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

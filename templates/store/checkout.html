@@ -1,227 +1,345 @@
-<!DOCTYPE html>
-<html>
-<head>
-<title>Checkout</title>
 
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+{% extends "base.html" %}
+{% load static %}
 
-</head>
+{% block title %}Checkout | Nexora Mart{% endblock %}
 
-<body>
+{% block content %}
 
-<div class="container mt-5">
+<div class="container py-5">
 
-<h2 class="text-center mb-4">
-Checkout
-</h2>
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-md-10">
 
+            <div class="card shadow-sm border-0">
+                <div class="card-body p-4 p-md-5">
 
-<form method="POST" enctype="multipart/form-data">
+                    <!-- Back Button + Checkout Heading -->
+<div class="d-flex align-items-center justify-content-between mb-4">
 
-{% csrf_token %}
+    <a href="{% url 'cart' %}" class="btn btn-outline-dark">
+        ← Back to Cart
+    </a>
 
+    <h2 class="fw-bold mb-0 text-center">
+        Checkout
+    </h2>
 
-<div class="mb-3">
-<label>Name</label>
-<input type="text" 
-name="name" 
-class="form-control"
-required>
+    <div></div>
+
 </div>
 
+                    <p class="text-muted text-center mb-4">
+                        Enter your delivery details and select a payment method.
+                    </p>
 
-<div class="mb-3">
-<label>Phone Number</label>
-<input type="text"
-name="phone"
-class="form-control"
-required>
-</div>
+                    <form method="POST"
+                          enctype="multipart/form-data">
 
+                        {% csrf_token %}
 
-<div class="mb-3">
-<label>Address</label>
-<textarea 
-name="address"
-class="form-control"
-required></textarea>
-</div>
+                        <!-- Customer Details -->
+                        <h5 class="mb-3">Delivery Information</h5>
 
+                        <div class="mb-3">
+                            <label for="name" class="form-label">
+                                Name
+                            </label>
 
-<div class="mb-3">
-<label>City</label>
-<input type="text"
-name="city"
-class="form-control"
-required>
-</div>
-<hr>
+                            <input
+                                type="text"
+                                id="name"
+                                name="name"
+                                class="form-control"
+                                autocomplete="name"
+                                required
+                            >
+                        </div>
 
-<h5>Payment Method</h5>
+                        <div class="mb-3">
+                            <label for="phone" class="form-label">
+                                Phone Number
+                            </label>
 
-<div class="form-check">
-    <input class="form-check-input"
-           type="radio"
-           name="payment_method"
-           value="COD"
-           checked>
+                            <input
+                                type="tel"
+                                id="phone"
+                                name="phone"
+                                class="form-control"
+                                autocomplete="tel"
+                                required
+                            >
+                        </div>
 
-    <label class="form-check-label">
-        Cash on Delivery
-    </label>
-</div>
-<div class="form-check">
-    <input
-        class="form-check-input"
-        type="radio"
-        name="payment_method"
-        value="EASYPAISA"
-        id="easypaisa">
+                        <div class="mb-3">
+                            <label for="address" class="form-label">
+                                Address
+                            </label>
 
-    <label class="form-check-label" for="easypaisa">
-        Easypaisa
-    </label>
-</div>
+                            <textarea
+                                id="address"
+                                name="address"
+                                class="form-control"
+                                rows="3"
+                                autocomplete="street-address"
+                                required
+                            ></textarea>
+                        </div>
 
-<div class="form-check mb-3">
-    <input
-        class="form-check-input"
-        type="radio"
-        name="payment_method"
-        value="JAZZCASH"
-        id="jazzcash">
+                        <div class="mb-4">
+                            <label for="city" class="form-label">
+                                City
+                            </label>
 
-    <label class="form-check-label" for="jazzcash">
-        JazzCash
-    </label>
-</div>
-<!-- Easypaisa -->
-<div id="easypaisaBox" style="display:none;" class="border rounded p-3 mb-3">
+                            <input
+                                type="text"
+                                id="city"
+                                name="city"
+                                class="form-control"
+                                autocomplete="address-level2"
+                                required
+                            >
+                        </div>
 
-    <h5>📱 Easypaisa Payment</h5>
+                        <hr>
 
-    <p>Send payment to:</p>
+                        <!-- Payment Method -->
+                        <h5 class="mb-3">Payment Method</h5>
 
-    <strong>0321-1234567</strong>
+                        <div class="form-check mb-2">
+                            <input
+                                class="form-check-input"
+                                type="radio"
+                                name="payment_method"
+                                value="COD"
+                                id="cod"
+                                checked
+                            >
 
-    <div class="mt-3">
-        <label>Transaction ID</label>
+                            <label class="form-check-label" for="cod">
+                                Cash on Delivery
+                            </label>
+                        </div>
 
-        <input
-            type="text"
-            name="easypaisa_transaction"
-            class="form-control">
+                        <div class="form-check mb-2">
+                            <input
+                                class="form-check-input"
+                                type="radio"
+                                name="payment_method"
+                                value="EASYPAISA"
+                                id="easypaisa"
+                            >
+
+                            <label class="form-check-label" for="easypaisa">
+                                Easypaisa
+                            </label>
+                        </div>
+
+                        <div class="form-check mb-3">
+                            <input
+                                class="form-check-input"
+                                type="radio"
+                                name="payment_method"
+                                value="JAZZCASH"
+                                id="jazzcash"
+                            >
+
+                            <label class="form-check-label" for="jazzcash">
+                                JazzCash
+                            </label>
+                        </div>
+
+                        <!-- Easypaisa Details -->
+                        <div
+                            id="easypaisaBox"
+                            class="border rounded p-3 mb-3"
+                            style="display: none;"
+                        >
+
+                            <h5>📱 Easypaisa Payment</h5>
+
+                            <p class="mb-2">
+                                Send payment to:
+                                <strong>0321-1234567</strong>
+                            </p>
+
+                            <div class="mb-3">
+                                <label
+                                    for="easypaisa_transaction"
+                                    class="form-label"
+                                >
+                                    Transaction ID
+                                </label>
+
+                                <input
+                                    type="text"
+                                    id="easypaisa_transaction"
+                                    name="easypaisa_transaction"
+                                    class="form-control"
+                                >
+                            </div>
+
+                            <div>
+                                <label
+                                    for="easypaisa_screenshot"
+                                    class="form-label"
+                                >
+                                    Upload Payment Screenshot
+                                </label>
+
+                                <input
+                                    type="file"
+                                    id="easypaisa_screenshot"
+                                    name="easypaisa_screenshot"
+                                    class="form-control"
+                                    accept="image/*"
+                                >
+                            </div>
+
+                        </div>
+
+                        <!-- JazzCash Details -->
+                        <div
+                            id="jazzcashBox"
+                            class="border rounded p-3 mb-3"
+                            style="display: none;"
+                        >
+
+                            <h5>💳 JazzCash Payment</h5>
+
+                            <p class="mb-2">
+                                Send payment to:
+                                <strong>0300-9876543</strong>
+                            </p>
+
+                            <div class="mb-3">
+                                <label
+                                    for="jazzcash_transaction"
+                                    class="form-label"
+                                >
+                                    Transaction ID
+                                </label>
+
+                                <input
+                                    type="text"
+                                    id="jazzcash_transaction"
+                                    name="jazzcash_transaction"
+                                    class="form-control"
+                                >
+                            </div>
+
+                            <div>
+                                <label
+                                    for="jazzcash_screenshot"
+                                    class="form-label"
+                                >
+                                    Upload Payment Screenshot
+                                </label>
+
+                                <input
+                                    type="file"
+                                    id="jazzcash_screenshot"
+                                    name="jazzcash_screenshot"
+                                    class="form-control"
+                                    accept="image/*"
+                                >
+                            </div>
+
+                        </div>
+
+                        <hr>
+
+                        <!-- Coupon -->
+                        <h5 class="mb-3">Apply Coupon</h5>
+
+                        <div class="mb-4">
+                            <label for="coupon" class="form-label">
+                                Coupon Code
+                            </label>
+
+                            <input
+                                type="text"
+                                id="coupon"
+                                name="coupon"
+                                class="form-control"
+                                placeholder="Enter Coupon Code"
+                            >
+                        </div>
+
+                        <!-- Total -->
+                        <div class="bg-light rounded p-3 mb-4">
+                            <h4 class="mb-0">
+                                Total: Rs {{ total }}
+                            </h4>
+                        </div>
+
+                        <!-- Place Order -->
+                        <button
+                            type="submit"
+                            class="btn btn-success btn-lg w-100"
+                        >
+                            Place Order
+                        </button>
+
+                    </form>
+
+                </div>
+            </div>
+
+        </div>
     </div>
 
-    <div class="mt-3">
-        <label>Upload Screenshot</label>
-
-        <input
-            type="file"
-            name="easypaisa_screenshot"
-            class="form-control"
-            accept="image/*">
-    </div>
-
 </div>
 
-<!-- JazzCash -->
-<div id="jazzcashBox" style="display:none;" class="border rounded p-3 mb-3">
+{% endblock %}
 
-    <h5>💳 JazzCash Payment</h5>
-
-    <p>Send payment to:</p>
-
-    <strong>0300-9876543</strong>
-
-    <div class="mt-3">
-        <label>Transaction ID</label>
-
-        <input
-            type="text"
-            name="jazzcash_transaction"
-            class="form-control">
-    </div>
-
-    <div class="mt-3">
-        <label>Upload Screenshot</label>
-
-        <input
-            type="file"
-            name="jazzcash_screenshot"
-            class="form-control"
-            accept="image/*">
-    </div>
-
-</div>
-
-
-<h4>
-    Total: Rs{{ total }}
-</h4>
-
-<hr>
-<h5>Apply Coupon</h5>
-
-<div class="mb-3">
-    <label>Coupon Code</label>
-
-    <input
-        type="text"
-        name="coupon"
-        class="form-control"
-        placeholder="Enter Coupon Code">
-</div>
-
-<button class="btn btn-success mb-5">
-    Place Order
-</button>
-
-
-</form>
-
-
-</div>
-
-
-</div>
+{% block extra_js %}
 <script>
+document.addEventListener("DOMContentLoaded", function () {
+    const methods = document.querySelectorAll(
+        'input[name="payment_method"]'
+    );
 
-const methods = document.querySelectorAll('input[name="payment_method"]');
+    const easypaisaBox = document.getElementById("easypaisaBox");
+    const jazzcashBox = document.getElementById("jazzcashBox");
 
-const easypaisaBox = document.getElementById("easypaisaBox");
-const jazzcashBox = document.getElementById("jazzcashBox");
+    const easypaisaTransaction = document.getElementById(
+        "easypaisa_transaction"
+    );
+    const easypaisaScreenshot = document.getElementById(
+        "easypaisa_screenshot"
+    );
 
-function togglePaymentBoxes(){
+    const jazzcashTransaction = document.getElementById(
+        "jazzcash_transaction"
+    );
+    const jazzcashScreenshot = document.getElementById(
+        "jazzcash_screenshot"
+    );
 
-    const selected = document.querySelector('input[name="payment_method"]:checked').value;
+    function togglePaymentBoxes() {
+        const selected = document.querySelector(
+            'input[name="payment_method"]:checked'
+        );
 
-    // Sab boxes hide
-    easypaisaBox.style.display = "none";
-    jazzcashBox.style.display = "none";
+        const isEasypaisa = selected && selected.value === "EASYPAISA";
+        const isJazzCash = selected && selected.value === "JAZZCASH";
 
-    // Easypaisa
-    if(selected === "EASYPAISA"){
-        easypaisaBox.style.display = "block";
+        easypaisaBox.style.display = isEasypaisa ? "block" : "none";
+        jazzcashBox.style.display = isJazzCash ? "block" : "none";
+
+        easypaisaTransaction.required = isEasypaisa;
+        easypaisaScreenshot.required = isEasypaisa;
+
+        jazzcashTransaction.required = isJazzCash;
+        jazzcashScreenshot.required = isJazzCash;
     }
 
-    // JazzCash
-    if(selected === "JAZZCASH"){
-        jazzcashBox.style.display = "block";
-    }
+    methods.forEach(function (method) {
+        method.addEventListener("change", togglePaymentBoxes);
+    });
 
-    // COD me dono hide rahenge
-}
-
-methods.forEach(function(item){
-
-    item.addEventListener("change", togglePaymentBoxes);
-
+    togglePaymentBoxes();
 });
-
-// Page load par bhi check karo
-togglePaymentBoxes();
-
 </script>
-</body>
-</html>
+{% endblock %}

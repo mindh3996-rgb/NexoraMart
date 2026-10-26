@@ -4,3 +4,8 @@ __pycache__/
 db.sqlite3
 .env
 media/
+data_backup.json
+db_backup.sqlite3
+
+
+store/views.py beckup.py

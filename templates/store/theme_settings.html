@@ -1,0 +1,42 @@
+
+{% extends "base.html" %}
+{% block title %}Global Theme Settings{% endblock %}
+{% block content %}
+<div class="container py-5" style="max-width:750px">
+  <div class="card shadow p-4 rounded-4">
+    <h2>🎨 Global Website Theme</h2>
+    {% for message in messages %}<div class="alert alert-success">{{ message }}</div>{% endfor %}
+    <form method="POST">
+      {% csrf_token %}
+      <label class="form-label">Theme Style</label>
+      <select name="theme_type" class="form-select mb-3">
+        {% for value,label in theme.THEME_CHOICES %}
+        <option value="{{ value }}" {% if theme.theme_type == value %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+      <label class="form-label">Solid Background</label>
+      <input type="color" name="background_color" value="{{ theme.background_color }}" class="form-control form-control-color mb-3">
+      <label class="form-label">Gradient Color 1</label>
+      <input type="color" name="gradient_color_1" value="{{ theme.gradient_color_1 }}" class="form-control form-control-color mb-3">
+      <label class="form-label">Gradient Color 2</label>
+      <input type="color" name="gradient_color_2" value="{{ theme.gradient_color_2 }}" class="form-control form-control-color mb-3">
+      <label class="form-label">Gradient Direction</label>
+      <select name="gradient_direction" class="form-select mb-3">
+        {% for direction in "90deg,135deg,180deg,225deg" %}{% endfor %}
+        <option value="90deg" {% if theme.gradient_direction == "90deg" %}selected{% endif %}>Left to Right</option>
+        <option value="135deg" {% if theme.gradient_direction == "135deg" %}selected{% endif %}>Diagonal</option>
+        <option value="180deg" {% if theme.gradient_direction == "180deg" %}selected{% endif %}>Top to Bottom</option>
+        <option value="225deg" {% if theme.gradient_direction == "225deg" %}selected{% endif %}>Diagonal Reverse</option>
+      </select>
+      <label class="form-label">Glass Blur: <span id="blurValue">{{ theme.blur }}</span>px</label>
+      <input type="range" name="blur" min="0" max="40" value="{{ theme.blur }}" class="form-range mb-3" oninput="blurValue.textContent=this.value">
+      <label class="form-label">Transparency: <span id="transValue">{{ theme.transparency }}</span>%</label>
+      <input type="range" name="transparency" min="0" max="100" value="{{ theme.transparency }}" class="form-range mb-3" oninput="transValue.textContent=this.value">
+      <label class="form-label">Border Radius: <span id="radiusValue">{{ theme.border_radius }}</span>px</label>
+      <input type="range" name="border_radius" min="0" max="50" value="{{ theme.border_radius }}" class="form-range mb-4" oninput="radiusValue.textContent=this.value">
+      <button type="submit" class="btn btn-primary">Save Theme Settings</button>
+      <a href="{% url 'dashboard' %}" class="btn btn-secondary">Back</a>
+    </form>
+  </div>
+</div>
+{% endblock %}

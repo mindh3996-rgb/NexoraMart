@@ -1,67 +1,101 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Contact Us</title>
+{% extends "base.html" %}
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body class="bg-light">
+{% block title %}Contact Us | Nexora Mart{% endblock %}
+
+{% block content %}
 
 <div class="container py-5">
 
     <div class="row justify-content-center">
 
-        <div class="col-md-7">
+        <div class="col-lg-7 col-md-9">
 
-            <div class="card shadow p-4">
+            <div class="card shadow border-0 rounded-4">
 
-                <h2 class="text-center mb-4">
-                    Contact Us
-                </h2>
+                <div class="card-body p-4 p-md-5">
 
-                {% if messages %}
-                    {% for message in messages %}
-                        <div class="alert alert-success">
-                            {{ message }}
+                    <h2 class="text-center fw-bold mb-2">
+                        Contact Us
+                    </h2>
+
+                    <p class="text-muted text-center mb-4">
+                        Have a question? We'd love to hear from you.
+                    </p>
+
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-success alert-dismissible fade show"
+                                 role="alert">
+                                {{ message }}
+
+                                <button type="button"
+                                        class="btn-close"
+                                        data-bs-dismiss="alert"
+                                        aria-label="Close">
+                                </button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <form method="POST">
+                        {% csrf_token %}
+
+                        <!-- Name -->
+                        <div class="mb-3">
+                            <label for="name" class="form-label fw-semibold">
+                                Your Name
+                            </label>
+
+                            <input
+                                type="text"
+                                id="name"
+                                name="name"
+                                class="form-control form-control-lg"
+                                placeholder="Enter your name"
+                                autocomplete="name"
+                                required>
                         </div>
-                    {% endfor %}
-                {% endif %}
 
-                <form method="POST">
-                    {% csrf_token %}
+                        <!-- Email -->
+                        <div class="mb-3">
+                            <label for="email" class="form-label fw-semibold">
+                                Your Email
+                            </label>
 
-                    <div class="mb-3">
-                        <label>Your Name</label>
-                        <input type="text"
-                               name="name"
-                               class="form-control"
-                               required>
-                    </div>
+                            <input
+                                type="email"
+                                id="email"
+                                name="email"
+                                class="form-control form-control-lg"
+                                placeholder="Enter your email"
+                                autocomplete="email"
+                                required>
+                        </div>
 
-                    <div class="mb-3">
-                        <label>Your Email</label>
-                        <input type="email"
-                               name="email"
-                               class="form-control"
-                               required>
-                    </div>
+                        <!-- Message -->
+                        <div class="mb-4">
+                            <label for="message" class="form-label fw-semibold">
+                                Your Message
+                            </label>
 
-                    <div class="mb-3">
-                        <label>Your Message</label>
-                        <textarea
-                            name="message"
-                            rows="6"
-                            class="form-control"
-                            required></textarea>
-                    </div>
+                            <textarea
+                                id="message"
+                                name="message"
+                                rows="5"
+                                class="form-control"
+                                placeholder="Write your message here..."
+                                required></textarea>
+                        </div>
 
-                    <button class="btn btn-dark w-100">
-                        Send Message
-                    </button>
+                        <!-- Submit Button -->
+                        <button type="submit"
+                                class="btn btn-dark btn-lg w-100">
+                            Send Message
+                        </button>
 
-                </form>
+                    </form>
+
+                </div>
 
             </div>
 
@@ -71,5 +105,4 @@
 
 </div>
 
-</body>
-</html>
+{% endblock %}

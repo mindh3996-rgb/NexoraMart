@@ -1,256 +1,518 @@
+{% extends "base.html" %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Nexora Mart</title>
+{% block title %}Home | Nexora Mart{% endblock %}
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body>
-<!-- NavBar section -->
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+{% block content %}
 
-<div class="container">
-    
 
-    <a class="navbar-brand d-flex align-items-center" href="/">
-        <img src="{% static 'images/logo2.png' %}"
-             width="45"
-             height="45"
-             class="me-2">
+<style>
+#hero-section {
+    position: relative;
+    min-height: 450px;
+    display: flex;
+    align-items: center;
+    padding: 50px;
+    color: {{ hero.text_color|default:"#ffffff" }};
+    background: {{ hero.background_color|default:"#ffffff" }};
+    overflow: hidden;
+}
+#hero-section.layout-gradient {
+    background: linear-gradient(135deg, {{ hero.gradient_start }}, {{ hero.gradient_end }});
+}
+#hero-section.layout-background {
+    background-size: cover;
+    background-position: center;
+}
+#hero-section .hero-media-bg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: 0;
+}
+#hero-section .hero-content {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    font-family: {{ hero.font_family|default:"Arial, sans-serif" }};
+    text-align: {{ hero.alignment|default:"left" }};
+}
+#hero-section .hero-text-box {
+    display: inline-block;
+    padding: 25px;
+    border-radius: 18px;
+    background: rgba(0,0,0,{{ hero.box_opacity|default:45 }}%);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+#hero-section .hero-media-side {
+    width: 100%;
+    max-height: 450px;
+    object-fit: cover;
+    border-radius: 18px;
+}
+#hero-section .hero-btn {
+    display: inline-block;
+    padding: 13px 28px;
+    margin-top: 15px;
+    border-radius: 14px;
+    text-decoration: none;
+    color: {{ hero.button_text_color|default:"#ffffff" }};
+    background: {{ hero.button_color|default:"#6366f1" }};
+    transition: .3s;
+}
+#hero-section .hero-btn-glass {
+    background: rgba(255,255,255,.15);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255,255,255,.4);
+    box-shadow: 0 8px 25px rgba(0,0,0,.15);
+}
+#hero-section .hero-btn-clay {
+    box-shadow: 6px 6px 12px rgba(0,0,0,.2), -4px -4px 10px rgba(255,255,255,.2);
+}
+#hero-section .hero-btn:hover {
+    transform: translateY(-3px) scale(1.03);
+}
+#hero-section .hero-animate {
+    animation: heroFade .8s ease;
+}
+@keyframes heroFade {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
 
-        <span class="fw-bold fs-4">Nexora Mart</span>
-    </a>
+/* Buy Now popup - white theme */
+#buyNowModal .modal-content {
+  background: #ffffff !important;
+  color: #171717 !important;
+  border: 1px solid #dddddd;
+  border-radius: 18px;
+  box-shadow: 0 20px 60px #0003;
+}
 
-    <button class="navbar-toggler"
-            type="button"
-            data-bs-toggle="collapse"
-            data-bs-target="#menu">
-        <span class="navbar-toggler-icon"></span>
-    </button>
-     
-    <div class="collapse navbar-collapse" id="menu">
+#buyNowModal .modal-header,
+#buyNowModal .modal-body,
+#buyNowModal .modal-footer {
+  background: #ffffff !important;
+  color: #171717 !important;
+  border-color: #eeeeee !important;
+}
 
-        <!-- YAHAN YE UL LAGAO -->
-        <ul class="navbar-nav me-auto">
+#buyNowModal h1,
+#buyNowModal h2,
+#buyNowModal h3,
+#buyNowModal h4,
+#buyNowModal h5,
+#buyNowModal p,
+#buyNowModal label {
+  color: #171717 !important;
+}
 
-            <li class="nav-item">
-                <a class="nav-link" href="/">Home</a>
-            </li>
+#buyNowModal .form-control,
+#buyNowModal .form-select {
+  background: #ffffff !important;
+  color: #171717 !important;
+  border-color: #cccccc !important;
+}
 
-            <li class="nav-item">
-    <a class="nav-link" href="#featured-products">
-        Products
-    </a>
-</li>
+#buyNowModal .btn-close {
+  filter: none !important;
+}
+{% comment %} beautiful cart {% endcomment %}
+/* Beautiful Product Cards */
+.product-card, #featured-products .card {
+  border: 1px solid #eee;
+  border-radius: 20px;
+  overflow: hidden;
+  background: #fff;
+  box-shadow: 0 8px 25px rgba(0,0,0,.08);
+  transition: .35s ease;
+}
+#featured-products .card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 16px 35px rgba(99,102,241,.2);
+}
+#featured-products .card img {
+  transition: transform .4s ease;
+}
+#featured-products .card:hover img {
+  transform: scale(1.05);
+}
+/* Colourful Buttons */
+#featured-products .add-to-cart-btn,
+#featured-products .cart-btn {
+  background: linear-gradient(135deg,#06b6d4,#2563eb);
+  color: #fff; border: 0; border-radius: 12px;
+  padding: 11px 16px; font-weight: 700;
+}
+#featured-products .buy-now-btn {
+  background: linear-gradient(135deg,#f97316,#ec4899);
+  color: #fff; border: 0; border-radius: 12px;
+  padding: 11px 16px; font-weight: 700;
+}
+#featured-products .add-to-cart-btn:hover,
+#featured-products .cart-btn:hover,
+#featured-products .buy-now-btn:hover {
+  filter: brightness(1.08);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px #0002;
+}
 
-            <li class="nav-item">
-                <a class="nav-link" href="#categories">Categories</a>
-            </li>
+</style>
 
-            <li class="nav-item">
-                <a class="nav-link" href="{% url 'contact' %}">
-                 Contact
-             </a>
-            </li>
+{% if hero %}
+<section id="hero-section" class="layout-{{ hero.layout }}">
+    {% if hero.layout == "background" and hero.media_type == "image" and hero.image %}
+        <img class="hero-media-bg" src="{{ hero.image.url }}" alt="">
+    {% elif hero.layout == "background" and hero.media_type == "video" and hero.video %}
+        <video class="hero-media-bg" autoplay muted loop playsinline>
+            <source src="{{ hero.video.url }}">
+        </video>
+    {% endif %}
 
-            <li class="nav-item">
-                <a class="nav-link" href="{% url 'cart' %}">
-                    🛒 Cart
-                </a>
-            </li>
-            <li class="nav-item">
-    <a class="nav-link" href="{% url 'wishlist' %}">
-        ❤️ Wishlist
-    </a>
-</li>
-
-            {% if user.is_authenticated %}
-
-               <li class="nav-item dropdown">
-
-    <a class="nav-link dropdown-toggle"
-       href="#"
-       role="button"
-       data-bs-toggle="dropdown">
-
-        👤 {{ user.username }}
-
-    </a>
-
-    <ul class="dropdown-menu dropdown-menu-end">
-
-        <li>
-           <a class="dropdown-item" href="{% url 'profile' %}">
-    My Profile
-</a>
-        </li>
-
-        <li>
-            <a class="dropdown-item" href="{% url 'my_orders' %}">
-    My Orders
-</a>
-        </li>
-
-        <li><hr class="dropdown-divider"></li>
- {% if user.is_staff %}
-
-<li>
-    <a class="dropdown-item text-warning"
-       href="{% url 'dashboard' %}">
-        📊 Admin Dashboard
-    </a>
-</li>
-
-{% endif %}
-        <li>
-            <a class="dropdown-item text-danger"
-               href="{% url 'logout' %}">
-                Logout
-            </a>
-        </li>
-
-    </ul>
-
-</li>
-
-            {% else %}
-
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'login' %}">
-                        Login
-                    </a>
-                </li>
-
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'signup' %}">
-                        Signup
-                    </a>
-                </li>
-
+    <div class="hero-content hero-animate">
+        <div class="row align-items-center">
+            {% if hero.layout == "side" and hero.media_position == "left" %}
+            <div class="col-md-6">
+                {% if hero.media_type == "video" and hero.video %}
+                <video class="hero-media-side" controls><source src="{{ hero.video.url }}"></video>
+                {% elif hero.image %}
+                <img class="hero-media-side" src="{{ hero.image.url }}" alt="{{ hero.heading }}">
+                {% endif %}
+            </div>
             {% endif %}
 
-        </ul>
-      <form class="d-flex ms-3" method="GET" action="/">
-    <input
-        class="form-control me-2"
-        type="search"
-        name="search"
-        placeholder="Search products..."
-        value="{{ request.GET.search }}"
-    >
+            <div class="{% if hero.layout == 'side' %}col-md-6{% else %}col-12{% endif %}">
+                <div class="{% if hero.show_text_box %}hero-text-box{% endif %}">
+                    {% if hero.title %}<p>{{ hero.title }}</p>{% endif %}
+                    <h1 style="font-size:{{ hero.heading_size }}px;">{{ hero.heading }}</h1>
+                    <h4>{{ hero.subheading }}</h4>
+                    <p style="font-size:{{ hero.paragraph_size }}px;">{{ hero.paragraph }}</p>
+                    <a class="hero-btn hero-btn-{{ hero.button_style }}" href="{{ hero.button_url }}">{{ hero.button_text }}</a>
+                </div>
+            </div>
 
-    <button class="btn btn-outline-light" type="submit">
-        Search
-    </button>
-</form>
-
-    </div>
-
-</div>
-
-
-
-</nav>
-<!-- Hero Section -->
-<section class="container py-5" id="products">
-    <div class="row align-items-center">
-
-        <div class="col-md-6">
-            <h1 class="display-4 fw-bold">
-                Nexora Mart
-            </h1>
-
-            <p class="lead mt-3">
-                Elevate Your Everyday Look with Fashion You'll Love.
-            </p>
-
-           <a href="#featured-products" class="btn btn-primary btn-lg mt-3">
-    Shop Now
-</a>
+            {% if hero.layout == "side" and hero.media_position == "right" %}
+            <div class="col-md-6">
+                {% if hero.media_type == "video" and hero.video %}
+                <video class="hero-media-side" controls><source src="{{ hero.video.url }}"></video>
+                {% elif hero.image %}
+                <img class="hero-media-side" src="{{ hero.image.url }}" alt="{{ hero.heading }}">
+                {% endif %}
+            </div>
+            {% endif %}
         </div>
-
-        <div class="col-md-6 text-center">
-            <img src="{% static 'images/img.png' %}"
-     class="img-fluid"
-     style="max-height:450px; width:auto;"
-     alt="Logo">
-        </div>
-
     </div>
 </section>
-<div class="container mb-4" id="categories">
+{% else %}
+<section id="hero-section">
+    <div><h1>Nexora Mart</h1><p>Elevate Your Everyday Look with Fashion You'll Love.</p></div>
+</section>
+{% endif %}
 
+{% comment %} <section class="container mb-4" id="categories">
     <h4 class="mb-3">Categories</h4>
-
     <a href="/" class="btn btn-dark mb-2">All Products</a>
-
     {% for category in categories %}
+        <a href="/?category={{ category.id }}"
+           class="btn mb-2 {% if request.GET.category == category.id|stringformat:'s' %}btn-primary{% else %}btn-outline-primary{% endif %}">
+            {{ category.name }}
+        </a>
+    {% empty %}
+        <p class="text-muted">No categories available yet.</p>
+    {% endfor %}
+</section> {% endcomment %}
 
-<a href="/?category={{ category.id }}"
-   class="btn mb-2 
-   {% if request.GET.category == category.id|stringformat:'s' %}
-       btn-primary
-   {% else %}
-       btn-outline-primary
-   {% endif %}
-   ">
-    {{ category.name }}
-</a>
-
-{% endfor %}
-
-</div>
 <section class="container py-5" id="featured-products">
+    <h2 class="text-center fw-bold mb-5">Featured Products</h2>
 
-    <h2 class="text-center fw-bold mb-5">
-        Featured Products
-    </h2>
+    <style>
+        #featured-products .product-card-img {
+            height:250px;width:100%;object-fit:contain;padding:12px;
+        }
+        #featured-products .color-arrow {
+            width:38px;height:38px;border:0;border-radius:50%;
+            background:white;box-shadow:0 2px 10px #0002;
+            font-size:25px;cursor:pointer;
+        }
+        #featured-products .option-row {
+            display:grid;grid-template-columns:1fr 1fr;gap:10px;
+        }
+        #featured-products .form-select {min-width:0;}
+    </style>
 
     <div class="row">
-
         {% for product in products %}
-
         <div class="col-md-4 mb-4">
-            <div class="card shadow h-100">
-
-               <a href="{% url 'product_detail' product.id %}">
-    <img src="{{ product.image.url }}"
-         class="card-img-top"
-         style="height:250px; object-fit:contain; background:#fff; padding:10px;"
-         alt="{{ product.name }}">
-                </a>
-
-                <div class="card-body text-center">
-                  <h5>{{ product.name }}</h5>
-
-<p class="text-muted">
-    Category: {{ product.category }}
-</p>
-
-<p class="text-primary fw-bold">
-    Rs{{ product.price }}
-</p>
-                  <a href="{% url 'add_to_cart' product.id %}" class="btn btn-dark">
-    Add to Cart
-</a>
+            <div class="card shadow h-100 border-0 rounded-4 overflow-hidden">
+                <div class="position-relative">
+                    <a href="{% url 'product_detail' product.id %}">
+                        {% if product.image %}
+                            <img src="{{ product.image.url }}"
+                                 class="card-img-top product-card-img" alt="{{ product.name }}">
+                        {% else %}
+                            <div class="product-card-img d-flex align-items-center justify-content-center bg-light">
+                                No image available
+                            </div>
+                        {% endif %}
+                    </a>
+                    <button type="button" class="color-arrow color-prev position-absolute top-50 start-0 ms-2 translate-middle-y">‹</button>
+                    <button type="button" class="color-arrow color-next position-absolute top-50 end-0 me-2 translate-middle-y">›</button>
+                    <div class="text-center small text-muted pb-2 color-label">Available colors</div>
                 </div>
 
+                <div class="card-body">
+                    <h5 class="fw-bold">{{ product.name }}</h5>
+                    <p class="text-muted small mb-2">{{ product.category }}</p>
+                    <p class="fw-bold text-primary fs-5">Rs {{ product.price }}</p>
+
+                    <form method="POST" action="{% url 'add_to_cart' product.id %}" class="product-card-form">
+                        {% csrf_token %}
+
+                        {% if product.variants.exists %}
+                            <label class="form-label small">Color and variant</label>
+                            <select name="variant" class="form-select mb-3 variant-select" required>
+                                <option value="">Select color and size</option>
+                                {% for variant in product.variants.all %}
+                                    {% if variant.stock > 0 %}
+                                    <option value="{{ variant.id }}"
+                                            data-color="{{ variant.color }}"
+                                            data-size="{{ variant.size }}"
+                                            data-image="{% if variant.image %}{{ variant.image.url }}{% endif %}"
+                                            data-stock="{{ variant.stock }}"
+                                            data-extra="{{ variant.extra_price }}">
+                                        {{ variant.color }} / {{ variant.get_size_display }}
+                                    </option>
+                                    {% endif %}
+                                {% endfor %}
+                            </select>
+
+                            <div class="option-row mb-3">
+                                <div>
+                                    <label class="form-label small">Quantity</label>
+                                    <select name="quantity" class="form-select quantity-select">
+                                        {% for qty in "12345" %}
+                                            <option value="{{ qty }}">{{ qty }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="form-label small">Size</label>
+                                    <select class="form-select size-select" aria-label="Choose size">
+                                        <option value="">Select size</option>
+                                        {% for variant in product.variants.all %}
+                                            {% if variant.stock > 0 %}
+                                            <option value="{{ variant.size }}">{{ variant.get_size_display }}</option>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <p class="small text-muted stock-label"></p>
+                        {% else %}
+                            <label class="form-label small">Quantity</label>
+                            <select name="quantity" class="form-select mb-3">
+                                {% for qty in "12345" %}
+                                    <option value="{{ qty }}">{{ qty }}</option>
+                                {% endfor %}
+                            </select>
+                        {% endif %}
+
+                        <button type="submit" class="btn btn-dark w-100 mb-2">Add to Cart</button>
+                        <button type="button" class="btn btn-outline-dark w-100 buy-now-btn">Buy Now</button>
+                    </form>
+                </div>
             </div>
         </div>
-
+        {% empty %}
+            <div class="col-12 text-center">
+                <p class="text-muted">No products available right now.</p>
+            </div>
         {% endfor %}
-
     </div>
-
 </section>
+{% include "store/checkout_popup.html" %}
 
 
+<script>
+document.addEventListener("DOMContentLoaded", function () {
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+  // PRODUCT VARIANT, SIZE, COLOR AND STOCK
+  document.querySelectorAll("#featured-products .card").forEach(card => {
+    const image = card.querySelector(".product-card-img");
+    const variantSelect = card.querySelector(".variant-select");
+    const sizeSelect = card.querySelector(".size-select");
+    const quantitySelect = card.querySelector(".quantity-select");
+    const stockLabel = card.querySelector(".stock-label");
+    const colorLabel = card.querySelector(".color-label");
+    const prevBtn = card.querySelector(".color-prev");
+    const nextBtn = card.querySelector(".color-next");
 
-</body>
-</html>
+    if (!variantSelect || !sizeSelect) {
+      card.querySelectorAll(".color-arrow").forEach(btn => btn.hidden = true);
+      if (colorLabel) colorLabel.hidden = true;
+      return;
+    }
+
+    const variants = [...variantSelect.options].filter(o => o.value);
+    const sizes = [...new Map(variants.map(o => [
+      o.dataset.size,
+      { value: o.dataset.size, text: o.textContent.split("/").pop().trim() }
+    ])).values()];
+
+    sizeSelect.innerHTML = '<option value="">Select size</option>';
+    sizes.forEach(size => {
+      const option = document.createElement("option");
+      option.value = size.value;
+      option.textContent = size.text;
+      sizeSelect.appendChild(option);
+    });
+
+    const colors = [...new Set(variants.map(o => o.dataset.color))];
+    let currentColor = 0;
+
+    function updateVariant(color, size) {
+      let match = variants.find(o =>
+        o.dataset.color === color && o.dataset.size === size
+      );
+      if (!match) match = variants.find(o => o.dataset.color === color);
+      if (!match) return;
+
+      variantSelect.value = match.value;
+      sizeSelect.value = match.dataset.size;
+      currentColor = Math.max(0, colors.indexOf(match.dataset.color));
+
+      if (match.dataset.image && image) image.src = match.dataset.image;
+      if (colorLabel) colorLabel.textContent = "Color: " + match.dataset.color;
+      if (stockLabel) stockLabel.textContent = "Available stock: " + match.dataset.stock;
+
+      if (quantitySelect) {
+        [...quantitySelect.options].forEach(q => {
+          q.disabled = Number(q.value) > Number(match.dataset.stock);
+        });
+        if (Number(quantitySelect.value) > Number(match.dataset.stock)) {
+          quantitySelect.value = "1";
+        }
+      }
+    }
+
+    variantSelect.addEventListener("change", () => {
+      const selected = variantSelect.selectedOptions[0];
+      if (selected?.value) updateVariant(selected.dataset.color, selected.dataset.size);
+    });
+
+    sizeSelect.addEventListener("change", () => {
+      const selected = variantSelect.selectedOptions[0];
+      if (selected?.value && sizeSelect.value) {
+        updateVariant(selected.dataset.color, sizeSelect.value);
+      }
+    });
+
+    if (prevBtn) prevBtn.addEventListener("click", () => {
+      if (!colors.length) return;
+      currentColor = (currentColor - 1 + colors.length) % colors.length;
+      updateVariant(colors[currentColor], sizeSelect.value);
+    });
+
+    if (nextBtn) nextBtn.addEventListener("click", () => {
+      if (!colors.length) return;
+      currentColor = (currentColor + 1) % colors.length;
+      updateVariant(colors[currentColor], sizeSelect.value);
+    });
+
+    if (variants.length) {
+      updateVariant(variants[0].dataset.color, variants[0].dataset.size);
+    } else {
+      variantSelect.disabled = true;
+      sizeSelect.disabled = true;
+    }
+  });
+
+  // BUY NOW POPUP
+  document.querySelectorAll("#featured-products .buy-now-btn").forEach(button => {
+    button.addEventListener("click", function () {
+      const card = this.closest(".card");
+      const modal = document.getElementById("buyNowModal");
+      const details = document.getElementById("buyNowProduct");
+
+      if (!card || !modal || !details) {
+        alert("Buy Now popup nahi mila. checkout_popup.html mein buyNowModal check karein.");
+        return;
+      }
+
+      const variantSelect = card.querySelector(".variant-select");
+      const sizeSelect = card.querySelector(".size-select");
+      const quantitySelect = card.querySelector(".quantity-select");
+      const selectedVariant = variantSelect?.selectedOptions[0];
+
+      if (variantSelect && !variantSelect.value) {
+        alert("Please select a product variant.");
+        return;
+      }
+
+      const name = card.querySelector(".card-title")?.textContent.trim() || "Product";
+      const image = card.querySelector(".product-card-img")?.src || "";
+      const price = card.querySelector(".product-price")?.textContent.trim() || "";
+      const color = selectedVariant?.dataset.color || "";
+      const size = sizeSelect?.selectedOptions[0]?.textContent.trim() || "";
+      const quantity = quantitySelect?.value || "1";
+
+      details.replaceChildren();
+
+      if (image) {
+        const img = document.createElement("img");
+        img.src = image;
+        img.alt = name;
+        img.style.cssText = "width:100px;height:100px;object-fit:contain;float:left;margin:0 16px 10px 0";
+        details.appendChild(img);
+      }
+
+      const title = document.createElement("h5");
+      title.textContent = name;
+      details.appendChild(title);
+
+      const priceText = document.createElement("p");
+      priceText.textContent = price;
+      details.appendChild(priceText);
+
+      const options = document.createElement("p");
+      options.textContent = `Color: ${color || "Standard"} | Size: ${size || "Standard"} | Quantity: ${quantity}`;
+      details.appendChild(options);
+
+      // Add selected product data to the checkout form.
+      const form = modal.querySelector("form");
+      if (form) {
+        let directBuy = form.querySelector('[name="direct_buy"]');
+        if (!directBuy) {
+          directBuy = document.createElement("input");
+          directBuy.type = "hidden";
+          directBuy.name = "direct_buy";
+          form.appendChild(directBuy);
+        }
+        directBuy.value = "1";
+
+        const setHidden = (name, value) => {
+          let input = form.querySelector(`[name="${name}"]`);
+          if (!input) {
+            input = document.createElement("input");
+            input.type = "hidden";
+            input.name = name;
+            form.appendChild(input);
+          }
+          input.value = value;
+        };
+
+        setHidden("product_id", card.querySelector("[name='product_id']")?.value || card.dataset.productId || "");
+        setHidden("variant_id", variantSelect?.value || "");
+        setHidden("quantity", quantity);
+      }
+
+      bootstrap.Modal.getOrCreateInstance(modal).show();
+    });
+  });
+
+});
+</script>
+{% endblock %}

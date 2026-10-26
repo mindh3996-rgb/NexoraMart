@@ -1,0 +1,176 @@
+
+
+<style>
+#buyNowModal .modal-dialog{max-width:680px}
+
+#buyNowModal .modal-content{
+  background:#fff!important;color:#171717!important;
+  border:1px solid #ddd;border-radius:24px;
+  overflow:hidden;box-shadow:0 25px 90px #0003;
+}
+
+#buyNowModal .modal-header{
+  background:#f5f5f7!important;
+  border-bottom:1px solid #ddd;padding:24px;
+}
+#buyNowModal .modal-title{
+  color:#171717!important;font-size:23px;
+  font-weight:800;letter-spacing:.4px;
+}
+#buyNowModal .btn-close{
+  filter:none!important;
+}
+#buyNowModal .modal-body{
+  background:#fff!important;padding:25px;
+}
+#buyNowModal .form-label{
+  color:#333!important;font-size:13px;font-weight:650;
+}
+
+#buyNowModal .form-control,
+#buyNowModal .form-select,
+#buyNowModal input,
+#buyNowModal textarea{
+  background:#fff!important;color:#171717!important;
+  border:1.5px solid #999!important;
+  border-radius:11px;padding:12px 14px;
+  box-shadow:none!important;
+}
+#buyNowModal .form-control:focus,
+#buyNowModal .form-select:focus,
+#buyNowModal input:focus,
+#buyNowModal textarea:focus{
+  border-color:#7044ed!important;
+  box-shadow:0 0 0 3px #7044ed25!important;
+}
+#buyNowModal .form-control::placeholder{
+  color:#777!important;
+}
+#buyNowModal .form-select option{
+  background:#fff!important;color:#171717!important;
+}
+
+#buyNowProduct{
+  background:#f8f8fa!important;color:#171717!important;
+  border:1px solid #ddd!important;border-radius:16px;
+  padding:18px;margin-bottom:22px;
+}
+#buyNowProduct img{
+  width:100px!important;height:110px!important;
+  object-fit:contain;background:#f2f2f2;
+  padding:7px;border-radius:12px;
+  float:left;margin:0 16px 10px 0;
+}
+#buyNowProduct h5{
+  color:#171717!important;font-weight:800;margin-top:8px;
+}
+#buyNowProduct p{color:#555!important}
+
+#buyNowModal .payment-box{
+  background:#faf7ff!important;
+  color:#171717!important;
+  border:1px solid #d8c9ff;
+  padding:16px;border-radius:13px;
+}
+#buyNowModal .payment-box .alert{
+  background:#f5f5f5!important;
+  color:#171717!important;
+  border:1px solid #ddd;border-radius:10px;
+}
+#buyNowModal .btn-dark{
+  background:#171923!important;color:#fff!important;
+  border:0;border-radius:12px;padding:13px;
+  font-weight:800;transition:.2s;
+}
+#buyNowModal .btn-dark:hover{
+  background:#7044ed!important;
+  transform:translateY(-2px);
+  box-shadow:0 8px 25px #7748ee35;
+}
+@media(max-width:576px){
+  #buyNowModal .modal-body{padding:16px}
+  #buyNowModal .modal-title{font-size:19px}
+}
+</style>
+
+
+<div class="modal fade" id="buyNowModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header bg-dark text-white">
+        <h5 class="modal-title">Quick Checkout — Nexora Mart</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div id="buyNowProduct" class="alert alert-light border">
+  Product details yahan show hongi.
+</div>
+        <form method="POST" action="{% url 'checkout' %}" enctype="multipart/form-data">
+          {% csrf_token %}
+          <div class="mb-3">
+            <label class="form-label">Full Name</label>
+            <input name="name" class="form-control" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Phone</label>
+            <input name="phone" class="form-control" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Address</label>
+            <textarea name="address" class="form-control" required></textarea>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">City</label>
+            <input name="city" class="form-control" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Payment Method</label>
+            <select name="payment_method" class="form-select" required>
+              <option value="COD">Cash on Delivery</option>
+              <option value="EASYPAISA">Easypaisa</option>
+              <option value="JAZZCASH">JazzCash</option>
+            </select>
+            
+<div id="popupEasypaisa" class="payment-box mt-3" hidden>
+  <div class="alert alert-info">
+    <strong>Easypaisa Number:</strong> 034245555622
+    <p class="mb-0">Is number par payment bhejein.</p>
+  </div>
+  <label class="form-label">Transaction ID</label>
+  <input type="text" name="easypaisa_transaction" class="form-control">
+  <label class="form-label mt-2">Payment Screenshot</label>
+  <input type="file" name="easypaisa_screenshot" class="form-control" accept="image/*">
+</div>
+
+<div id="popupJazzcash" class="payment-box mt-3" hidden>
+  <div class="alert alert-warning">
+    <strong>JazzCash Number:</strong> 03000000000
+    <p class="mb-0">Is number par payment bhejein.</p>
+  </div>
+  <label class="form-label">Transaction ID</label>
+  <input type="text" name="jazzcash_transaction" class="form-control">
+  <label class="form-label mt-2">Payment Screenshot</label>
+  <input type="file" name="jazzcash_screenshot" class="form-control" accept="image/*">
+</div>
+
+<script>
+const paymentSelect = document.querySelector('#buyNowModal select[name="payment_method"]');
+function togglePopupPayment() {
+  document.querySelector('#popupEasypaisa').hidden = paymentSelect.value !== 'EASYPAISA';
+  document.querySelector('#popupJazzcash').hidden = paymentSelect.value !== 'JAZZCASH';
+}
+paymentSelect.addEventListener('change', togglePopupPayment);
+togglePopupPayment();
+</script>
+
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Coupon (optional)</label>
+            <input name="coupon" class="form-control">
+          </div>
+          <button type="submit" class="btn btn-dark w-100">Place Order</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

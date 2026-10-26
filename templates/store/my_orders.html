@@ -1,191 +1,186 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>My Orders - Nexora Mart</title>
+{% extends "base.html" %}
 
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #f5f5f5;
-            padding: 30px;
-        }
+{% block title %}My Orders | Nexora Mart{% endblock %}
 
-        h1 {
-            text-align: center;
-            color: #222;
-        }
+{% block content %}
 
-        .order-card {
-            background: white;
-            width: 80%;
-            margin: 20px auto;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-        }
+<div class="container py-5">
 
-        .order-header {
-            display: flex;
-            justify-content: space-between;
-            border-bottom: 1px solid #ddd;
-            padding-bottom: 10px;
-        }
+    <!-- Page Heading -->
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+        <h2 class="fw-bold mb-0">My Orders</h2>
 
-        .status {
-            padding: 5px 12px;
-            border-radius: 20px;
-            background: #ffc107;
-            color: white;
-            font-weight: bold;
-        }
-
-        .product {
-            margin-top: 15px;
-            padding: 10px;
-            background: #fafafa;
-            border-radius: 5px;
-        }
-
-        .empty {
-            text-align: center;
-            color: gray;
-            font-size: 18px;
-        }
-
-        .back-btn {
-            display: block;
-            width: 150px;
-            margin: 20px auto;
-            text-align: center;
-            padding: 10px;
-            background: #111;
-            color: white;
-            text-decoration: none;
-            border-radius: 5px;
-        }
-
-    </style>
-
-</head>
-
-<body>
-
-<h1>My Orders</h1>
-
-
-{% if orders %}
-
-    {% for order in orders %}
-
-    <div class="order-card">
-
-      <div class="order-header">
-
-    <div>
-        <h3>Order #{{ order.id }}</h3>
-        <p>Date: {{ order.created_at }}</p>
+        <a href="{% url 'home' %}" class="btn btn-outline-dark">
+            ← Continue Shopping
+        </a>
     </div>
 
-    <div>
+    {% if orders %}
 
-        {% if order.status == "Pending" %}
-            <span class="status" style="background:#ffc107;">
-                Pending
-            </span>
+        {% for order in orders %}
 
-        {% elif order.status == "Processing" %}
-            <span class="status" style="background:#0d6efd;">
-                Processing
-            </span>
+            <div class="card border-0 shadow-sm rounded-4 mb-4">
 
-        {% elif order.status == "Shipped" %}
-            <span class="status" style="background:#0dcaf0;">
-                Shipped
-            </span>
+                <!-- Order Header -->
+                <div class="card-header bg-white p-4 border-bottom">
+                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
 
-        {% elif order.status == "Delivered" %}
-            <span class="status" style="background:#198754;">
-                Delivered
-            </span>
+                        <div>
+                            <h5 class="fw-bold mb-2">
+                                Order #{{ order.id }}
+                            </h5>
 
-        {% else %}
-            <span class="status" style="background:#dc3545;">
-                Cancelled
-            </span>
+                            <p class="text-muted mb-0">
+                                Date: {{ order.created_at|date:"d M Y, h:i A" }}
+                            </p>
+                        </div>
 
-        {% endif %}
+                        <div>
+                            {% if order.status == "Pending" %}
+                                <span class="badge bg-warning text-dark px-3 py-2">
+                                    Pending
+                                </span>
 
-    </div>
+                            {% elif order.status == "Processing" %}
+                                <span class="badge bg-primary px-3 py-2">
+                                    Processing
+                                </span>
 
-</div>
-   
+                            {% elif order.status == "Shipped" %}
+                                <span class="badge bg-info text-dark px-3 py-2">
+                                    Shipped
+                                </span>
 
-        <h4>Customer Details</h4>
+                            {% elif order.status == "Delivered" %}
+                                <span class="badge bg-success px-3 py-2">
+                                    Delivered
+                                </span>
 
-        <p>
-            Name: {{ order.customer_name }}
-        </p>
+                            {% else %}
+                                <span class="badge bg-danger px-3 py-2">
+                                    {{ order.status }}
+                                </span>
+                            {% endif %}
+                        </div>
 
-        <p>
-            City: {{ order.city }}
-        </p>
+                    </div>
+                </div>
 
+                <!-- Order Details -->
+                <div class="card-body p-4">
 
-        <h4>Products</h4>
+                    <h6 class="fw-bold mb-3">
+                        Customer Details
+                    </h6>
 
-        {% for item in order.items.all %}
+                    <div class="row mb-4">
+                        <div class="col-md-6 mb-2">
+                            <span class="text-muted">Name:</span>
+                            <strong>{{ order.customer_name }}</strong>
+                        </div>
 
-        <div class="product">
+                        <div class="col-md-6 mb-2">
+                            <span class="text-muted">City:</span>
+                            <strong>{{ order.city }}</strong>
+                        </div>
+                    </div>
 
-            <b>{{ item.product.name }}</b>
+                    <hr>
 
-            <br>
+                    <!-- Products -->
+                    <h6 class="fw-bold mb-3">
+                        Ordered Products
+                    </h6>
 
-            Quantity:
-            {{ item.quantity }}
+                    {% for item in order.items.all %}
 
-            <br>
+                        <div class="bg-light rounded-3 p-3 mb-3">
+                            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
 
-            Price:
-            Rs {{ item.price }}
+                                <div>
+                                    <h6 class="fw-semibold mb-1">
+                                        {{ item.product.name }}
+                                    </h6>
 
-        </div>
+                                    <small class="text-muted">
+                                        Quantity: {{ item.quantity }}
+                                    </small>
+                                </div>
+
+                                <div class="text-end">
+                                    <span class="text-muted small">
+                                        Price per item
+                                    </span>
+
+                                    <div class="fw-semibold">
+                                        Rs {{ item.price }}
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+
+                    {% empty %}
+
+                        <p class="text-muted">
+                            No product details available for this order.
+                        </p>
+
+                    {% endfor %}
+
+                    <!-- Order Total -->
+                    <div class="d-flex flex-wrap justify-content-between align-items-center border-top pt-3 mt-3 gap-3">
+
+                        <h5 class="fw-bold mb-0">
+                            Total Amount
+                        </h5>
+
+                        <h5 class="fw-bold text-success mb-0">
+                            Rs {{ order.total_amount }}
+                        </h5>
+
+                    </div>
+
+                    <!-- Invoice Button -->
+                    <div class="mt-4">
+                        <a href="{% url 'download_invoice' order.id %}"
+                           class="btn btn-dark">
+                            <i class="bi bi-file-earmark-pdf"></i>
+                            Download Invoice PDF
+                        </a>
+                    </div>
+
+                </div>
+
+            </div>
 
         {% endfor %}
 
+    {% else %}
 
-        <h3>
-            Total:
-            Rs {{ order.total_amount }}
-        </h3>
+        <!-- Empty Orders Message -->
+        <div class="card border-0 shadow-sm rounded-4">
+            <div class="card-body text-center py-5">
 
-        <a href="{% url 'download_invoice' order.id %}"
-   class="back-btn"
-   style="display:inline-block; width:auto; margin-top:15px;">
-    Download Invoice PDF
-</a>
+                <h4 class="fw-bold mb-3">
+                    No Orders Yet
+                </h4>
 
-    </div>
+                <p class="text-muted mb-4">
+                    You haven't placed any orders yet.
+                    Explore our products and find something you love!
+                </p>
 
-    {% endfor %}
+                <a href="{% url 'product_list' %}"
+                   class="btn btn-dark px-4">
+                    Browse Products
+                </a>
 
+            </div>
+        </div>
 
-{% else %}
+    {% endif %}
 
-<p class="empty">
-    You have no orders yet.
-</p>
+</div>
 
-{% endif %}
-
-
-
-<a href="/" class="back-btn">
-    Continue Shopping
-</a>
-
-
-
-</body>
-</html>
+{% endblock %}

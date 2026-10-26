@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Manage Variants | Nexora Mart{% endblock %}
+{% block content %}
+<div class="container py-5">
+  <h2>🎨 Product Variant Management</h2>
+  <a href="{% url 'add_variant' %}" class="btn btn-primary my-3">+ Add Variant</a>
+  {% if messages %}{% for message in messages %}
+    <div class="alert alert-success">{{ message }}</div>
+  {% endfor %}{% endif %}
+  <div class="table-responsive">
+    <table class="table table-bordered table-hover align-middle">
+      <thead class="table-dark"><tr><th>Product</th><th>Image</th><th>Color</th><th>Size</th><th>Stock</th><th>Extra Price</th><th>Actions</th></tr></thead>
+      <tbody>
+      {% for v in variants %}
+      <tr>
+        <td>{{ v.product.name }}</td>
+        <td>{% if v.image %}<img src="{{ v.image.url }}" width="55" height="55" style="object-fit:cover">{% else %}—{% endif %}</td>
+        <td>{{ v.color }}</td><td>{{ v.get_size_display }}</td><td>{{ v.stock }}</td><td>Rs {{ v.extra_price }}</td>
+        <td>
+          <a href="{% url 'edit_variant' v.id %}" class="btn btn-sm btn-warning">Edit</a>
+          <form method="POST" action="{% url 'delete_variant' v.id %}" class="d-inline">
+            {% csrf_token %}
+            <button class="btn btn-sm btn-danger" onclick="return confirm('Delete this variant?')" type="submit">Delete</button>
+          </form>
+        </td>
+      </tr>
+      {% empty %}<tr><td colspan="7" class="text-center">No variants yet.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <a href="{% url 'dashboard' %}" class="btn btn-secondary">Back to Dashboard</a>
+</div>
+{% endblock %}

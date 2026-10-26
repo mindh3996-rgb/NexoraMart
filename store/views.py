@@ -18,6 +18,9 @@ from reportlab.pdfgen import canvas
 from django.contrib import messages
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Product, Category, Cart, Order, OrderItem, Profile, Wishlist, Review, Coupon
+from .models import ProductVariant
+from .models import HeroSection
+from .models import WebsiteTheme
 
 def home(request):
 
@@ -39,28 +42,46 @@ def home(request):
         )
 
     categories = Category.objects.all()
+    hero = HeroSection.objects.filter(is_active=True).first()
 
     context = {
         "products": products,
         "categories": categories,
+        "hero": hero,
     }
 
     return render(request, "store/index.html", context)
 @login_required
 def add_to_cart(request, product_id):
-
     product = get_object_or_404(Product, id=product_id)
 
-    cart_item, created = Cart.objects.get_or_create(
-        user=request.user,
-        product=product
-    )
+    if request.method == "POST":
+        variant_id = request.POST.get("variant")
+        quantity = max(1, int(request.POST.get("quantity", 1)))
 
-    if not created:
-        cart_item.quantity += 1
-        cart_item.save()
+        variant = None
+        if variant_id:
+            variant = get_object_or_404(
+                ProductVariant, id=variant_id, product=product
+            )
 
-    messages.success(request, "Product added to cart")
+        if request.POST.get("buy_now") == "1":
+            request.session["direct_buy"] = {
+                "product_id": product.id,
+                "variant_id": variant.id if variant else None,
+                "quantity": quantity,
+            }
+            return redirect("/?show_checkout=1")
+
+        cart_item, created = Cart.objects.get_or_create(
+            user=request.user, product=product, variant=variant
+        )
+        if not created:
+            cart_item.quantity += quantity
+            cart_item.save()
+
+        messages.success(request, "Product added to cart")
+        return redirect("cart")
 
     return redirect("cart")
 @login_required
@@ -121,81 +142,65 @@ def decrease_quantity(request, cart_id):
         item.delete()
 
     return redirect("cart")
+
 @login_required
 def checkout(request):
+    direct_buy = request.session.get("direct_buy")
 
-    cart_items = Cart.objects.filter(user=request.user)
-
-    total = 0
-
-    for item in cart_items:
-        total += item.product.price * item.quantity
+    if direct_buy:
+        product = get_object_or_404(Product, id=direct_buy["product_id"])
+        variant = None
+        if direct_buy.get("variant_id"):
+            variant = get_object_or_404(
+                ProductVariant, id=direct_buy["variant_id"], product=product
+            )
+        quantity = direct_buy["quantity"]
+        cart_items = [{
+            "product": product,
+            "variant": variant,
+            "quantity": quantity,
+            "price": product.price + (variant.extra_price if variant else 0),
+        }]
+        total = cart_items[0]["price"] * quantity
+    else:
+        cart_items = list(Cart.objects.filter(user=request.user).select_related("product", "variant"))
+        for item in cart_items:
+            item.price = item.product.price + (
+                item.variant.extra_price if item.variant else 0
+            )
+        total = sum(item.price * item.quantity for item in cart_items)
 
     discount = 0
 
     if request.method == "POST":
-
         code = request.POST.get("coupon")
-
         if code:
-
             try:
-                coupon = Coupon.objects.get(
-                    code=code,
-                    active=True
-                )
-
+                coupon = Coupon.objects.get(code=code, active=True)
                 discount = coupon.discount
                 total = total - (total * discount / 100)
-
-                messages.success(
-                    request,
-                    f"Coupon Applied! {discount}% Discount"
-                )
-
+                messages.success(request, f"Coupon Applied! {discount}% Discount")
             except Coupon.DoesNotExist:
-
-                messages.error(
-                    request,
-                    "Invalid Coupon Code"
-                )
+                messages.error(request, "Invalid Coupon Code")
 
         name = request.POST.get("name")
         phone = request.POST.get("phone")
         address = request.POST.get("address")
         city = request.POST.get("city")
         payment_method = request.POST.get("payment_method")
-
-        # Default values
         transaction_id = ""
         payment_screenshot = None
 
-        # Easypaisa
         if payment_method == "EASYPAISA":
-
             transaction_id = request.POST.get("easypaisa_transaction")
             payment_screenshot = request.FILES.get("easypaisa_screenshot")
-
-            if not transaction_id:
-                messages.error(request, "Please enter Easypaisa Transaction ID.")
-                return redirect("checkout")
-
-            if not payment_screenshot:
-                messages.error(request, "Please upload Easypaisa screenshot.")
-                return redirect("checkout")
-
-        # JazzCash
         elif payment_method == "JAZZCASH":
-
             transaction_id = request.POST.get("jazzcash_transaction")
             payment_screenshot = request.FILES.get("jazzcash_screenshot")
 
-            if not transaction_id:
-                messages.error(request, "Please enter JazzCash Transaction ID.")
-                return redirect("checkout")
-
-            if not payment_screenshot:
-                messages.error(request, "Please upload JazzCash screenshot.")
+        if payment_method in ["EASYPAISA", "JAZZCASH"]:
+            if not transaction_id or not payment_screenshot:
+                messages.error(request, "Transaction ID aur payment screenshot dono required hain.")
                 return redirect("checkout")
 
         order = Order.objects.create(
@@ -207,89 +212,51 @@ def checkout(request):
             payment_method=payment_method,
             transaction_id=transaction_id,
             payment_screenshot=payment_screenshot,
-            total_amount=total
+            total_amount=total,
         )
 
         for item in cart_items:
-
             OrderItem.objects.create(
                 order=order,
-                product=item.product,
-                variant=item.variant,
-                quantity=item.quantity,
-                price=item.product.price
+                product=item["product"] if isinstance(item, dict) else item.product,
+                variant=item["variant"] if isinstance(item, dict) else item.variant,
+                quantity=item["quantity"] if isinstance(item, dict) else item.quantity,
+                price=item["price"] if isinstance(item, dict) else item.price,
             )
 
-        #        # ==========================
-        # Email to Customer (HTML)
-        # ==========================
-
-        html_content = render_to_string(
-            "store/order_confirmation_email.html",
-            {
-                "name": name,
-                "address": address,
-                "city": city,
-                "payment_method": payment_method,
-                "total": total,
-            }
-        )
-
+        html_content = render_to_string("store/order_confirmation_email.html", {
+            "name": name, "address": address, "city": city,
+            "payment_method": payment_method, "total": total,
+        })
         email = EmailMultiAlternatives(
             subject="Your Order Confirmation - Nexora Mart",
-            body=f"""
-Dear {name},
-
-Thank you for shopping at Nexora Mart.
-
-Your order has been placed successfully.
-""",
+            body=f"Dear {name},\n\nThank you for shopping at Nexora Mart.",
             from_email=settings.EMAIL_HOST_USER,
             to=[request.user.email],
         )
-
         email.attach_alternative(html_content, "text/html")
         email.send()
-        # ==========================
-        # Email to Admin
-        # ==========================
-
-        admin_message = f"""
-New Order Received
-
-Customer: {name}
-
-Phone: {phone}
-
-Address: {address}
-
-City: {city}
-
-Payment Method: {payment_method}
-
-Transaction ID: {transaction_id}
-
-Total: Rs{total}
-"""
 
         send_mail(
             subject="New Order Received - Nexora Mart",
-            message=admin_message,
+            message=f"Customer: {name}\nPhone: {phone}\nAddress: {address}\nCity: {city}\nPayment: {payment_method}\nTransaction ID: {transaction_id}\nTotal: Rs{total}",
             from_email=settings.DEFAULT_FROM_EMAIL,
             recipient_list=["mind3996@gmail.com"],
             fail_silently=False,
         )
 
-        Cart.objects.filter(user=request.user).delete()
+        if direct_buy:
+            request.session.pop("direct_buy", None)
+        else:
+            Cart.objects.filter(user=request.user).delete()
 
         return redirect("order_success")
 
-    context = {
+    return render(request, "store/checkout.html", {
         "cart_items": cart_items,
         "total": total,
-    }
-
-    return render(request, "store/checkout.html", context)
+        "direct_buy": bool(direct_buy),
+    })
 
 
 def order_success(request):
@@ -875,3 +842,107 @@ def update_order_status(request, order_id):
         )
 
     return redirect("dashboard")
+from django.shortcuts import render
+
+def order_confirmation_preview(request):
+    context = {
+        "name": "Customer",
+        "total": 2500,
+        "payment_method": "Cash on Delivery",
+        "city": "Pirmahal",
+        "address": "Example delivery address",
+    }
+
+    
+    return render(
+    request,
+    "store/order_success.html",
+    context
+)
+@login_required
+def variant_list(request):
+    if not request.user.is_staff:
+        return redirect("home")
+    variants = ProductVariant.objects.select_related("product").all()
+    return render(request, "store/variant_list.html", {"variants": variants})
+
+
+@login_required
+def add_variant(request):
+    if not request.user.is_staff:
+        return redirect("home")
+    products = Product.objects.all()
+    if request.method == "POST":
+        try:
+            ProductVariant.objects.create(
+                product=get_object_or_404(Product, id=request.POST.get("product")),
+                color=request.POST.get("color", "").strip(),
+                size=request.POST.get("size"),
+                stock=int(request.POST.get("stock", 0)),
+                extra_price=request.POST.get("extra_price", 0),
+                image=request.FILES.get("image")
+            )
+            messages.success(request, "Variant added successfully.")
+            return redirect("variant_list")
+        except (ValueError, TypeError):
+            messages.error(request, "Please enter valid stock and price.")
+    return render(request, "store/variant_form.html", {"products": products, "sizes": ProductVariant.SIZE_CHOICES})
+
+
+@login_required
+def edit_variant(request, variant_id):
+    if not request.user.is_staff:
+        return redirect("home")
+    variant = get_object_or_404(ProductVariant, id=variant_id)
+    products = Product.objects.all()
+    if request.method == "POST":
+        try:
+            variant.product = get_object_or_404(Product, id=request.POST.get("product"))
+            variant.color = request.POST.get("color", "").strip()
+            variant.size = request.POST.get("size")
+            variant.stock = int(request.POST.get("stock", 0))
+            variant.extra_price = request.POST.get("extra_price", 0)
+            if request.FILES.get("image"):
+                variant.image = request.FILES["image"]
+            variant.save()
+            messages.success(request, "Variant updated successfully.")
+            return redirect("variant_list")
+        except (ValueError, TypeError):
+            messages.error(request, "Please enter valid stock and price.")
+    return render(request, "store/variant_form.html", {"variant": variant, "products": products, "sizes": ProductVariant.SIZE_CHOICES})
+
+
+@login_required
+def delete_variant(request, variant_id):
+    if not request.user.is_staff:
+        return redirect("home")
+    variant = get_object_or_404(ProductVariant, id=variant_id)
+    if request.method == "POST":
+        variant.delete()
+        messages.success(request, "Variant deleted successfully.")
+    return redirect("variant_list")    
+    
+@login_required
+def theme_settings(request):
+    if not request.user.is_staff:
+        return redirect("home")
+
+    theme = WebsiteTheme.objects.filter(is_active=True).first()
+
+    if not theme:
+        theme = WebsiteTheme.objects.create(name="Main Theme")
+
+    if request.method == "POST":
+        theme.theme_type = request.POST.get("theme_type", "solid")
+        theme.background_color = request.POST.get("background_color", "#ffffff")
+        theme.gradient_color_1 = request.POST.get("gradient_color_1", "#667eea")
+        theme.gradient_color_2 = request.POST.get("gradient_color_2", "#764ba2")
+        theme.gradient_direction = request.POST.get("gradient_direction", "135deg")
+        theme.blur = int(request.POST.get("blur", 15))
+        theme.transparency = int(request.POST.get("transparency", 20))
+        theme.border_radius = int(request.POST.get("border_radius", 16))
+        theme.save()
+        messages.success(request, "Theme settings saved!")
+        return redirect("theme_settings")
+
+    return render(request, "store/theme_settings.html", {"theme": theme})

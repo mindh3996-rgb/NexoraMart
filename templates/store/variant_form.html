@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Product Variant | Nexora Mart{% endblock %}
+{% block content %}
+<div class="container py-5" style="max-width:700px">
+  <div class="card shadow border-0 rounded-4 p-4">
+    <h2 class="mb-4">{% if variant %}✏️ Edit Variant{% else %}🎨 Add Product Variant{% endif %}</h2>
+    {% for message in messages %}<div class="alert alert-danger">{{ message }}</div>{% endfor %}
+    <form method="POST" enctype="multipart/form-data">
+      {% csrf_token %}
+      <label class="form-label">Product</label>
+      <select name="product" class="form-select mb-3" required>
+        <option value="">Select Product</option>
+        {% for p in products %}
+        <option value="{{ p.id }}" {% if variant.product_id == p.id %}selected{% endif %}>{{ p.name }}</option>
+        {% endfor %}
+      </select>
+      <label class="form-label">Color</label>
+      <input name="color" class="form-control mb-3" value="{{ variant.color|default:'' }}" required>
+      <label class="form-label">Size</label>
+      <select name="size" class="form-select mb-3" required>
+        {% for value,label in sizes %}
+        <option value="{{ value }}" {% if variant.size == value %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+      <label class="form-label">Stock</label>
+      <input type="number" name="stock" min="0" class="form-control mb-3" value="{{ variant.stock|default:0 }}" required>
+      <label class="form-label">Extra Price (Rs)</label>
+      <input type="number" name="extra_price" min="0" step="0.01" class="form-control mb-3" value="{{ variant.extra_price|default:'0.00' }}" required>
+      <label class="form-label">Variant Image (optional)</label>
+      <input type="file" name="image" accept="image/*" class="form-control mb-4">
+      {% if variant.image %}<img src="{{ variant.image.url }}" width="90" class="mb-3 rounded">{% endif %}
+      <button type="submit" class="btn btn-primary">{% if variant %}Update Variant{% else %}Save Variant{% endif %}</button>
+      <a href="{% url 'variant_list' %}" class="btn btn-secondary">Cancel</a>
+    </form>
+  </div>
+</div>
+{% endblock %}

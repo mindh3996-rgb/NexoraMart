@@ -4,7 +4,8 @@ from store import views
 
 from django.conf import settings
 from django.conf.urls.static import static
-
+from django.conf import settings
+from django.conf.urls.static import static
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', views.home, name='home'),
@@ -104,12 +105,24 @@ path(
     views.product_view,
     name="product_view"
 ),
+# path(
+#     "update-order/<int:order_id>/",
+#     views.update_order_status,
+#     name="update_order_status",
+# ),
 path(
-    "update-order/<int:order_id>/",
-    views.update_order_status,
-    name="update_order_status",
+    "order-confirmation-preview/",
+    views.order_confirmation_preview,
+    name="order_confirmation_preview"
 ),
+path("variants/", views.variant_list, name="variant_list"),
+path("variants/add/", views.add_variant, name="add_variant"),
+path("variants/edit/<int:variant_id>/", views.edit_variant, name="edit_variant"),
+path("variants/delete/<int:variant_id>/", views.delete_variant, name="delete_variant"),
+path("dashboard/theme/", views.theme_settings, name="theme_settings"),
 ]
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)    

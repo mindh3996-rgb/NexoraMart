@@ -177,3 +177,87 @@ class ProductVariantAdmin(admin.ModelAdmin):
         "color",
         "size",
     )
+from .models import MenuItem
+
+@admin.register(MenuItem)
+class MenuItemAdmin(admin.ModelAdmin):
+    list_display = ("title", "url", "parent", "order", "is_active")
+    list_editable = ("order", "is_active")
+    list_filter = ("is_active",)
+    search_fields = ("title",)
+
+from .models import HeroSection
+
+
+@admin.register(HeroSection)
+class HeroSectionAdmin(admin.ModelAdmin):
+    list_display = ("title", "layout", "media_type", "button_style", "is_active")
+    list_editable = ("is_active",)
+    list_filter = ("layout", "media_type", "animation", "button_style", "is_active")
+    search_fields = ("title", "heading", "subheading")
+
+    fieldsets = (
+        ("Text Content", {"fields": ("title", "heading", "subheading", "paragraph", "font_family", "heading_size", "paragraph_size", "alignment", "text_color")}),
+        ("Image / Video", {"fields": ("media_type", "image", "video", "layout", "media_position", "content_position")}),
+        ("Background Design", {"fields": ("background_color", "gradient_start", "gradient_end", "show_text_box", "box_opacity")}),
+        ("Button Settings", {"fields": ("button_text", "button_url", "button_style", "button_color", "button_text_color")}),
+        ("Effects & Status", {"fields": ("animation", "is_active")}),
+    )
+
+from .models import NavbarSettings
+
+
+@admin.register(NavbarSettings)
+class NavbarSettingsAdmin(admin.ModelAdmin):
+    fieldsets = (
+        ("Logo & Branding", {
+            "fields": (
+                "logo", "brand_name", "show_brand_name",
+                "logo_width", "logo_height", "logo_alignment",
+                "logo_animation", "animation_speed",
+            )
+        }),
+        ("Background & Morphism", {
+            "fields": (
+                "background_color", "background_opacity",
+                "background_morphism", "background_blur",
+                "background_gradient", "gradient_start",
+                "gradient_end", "border_color",
+                "shadow_enabled", "sticky_header",
+            )
+        }),
+        ("Menu Design", {
+            "fields": (
+                "menu_style", "menu_text_color", "menu_hover_color",
+                "menu_background_color", "menu_font_size", "menu_gap",
+                "menu_underline_color", "menu_border_radius",
+            )
+        }),
+        ("Icons & Visibility", {
+            "fields": (
+                "icon_display", "icon_color", "icon_hover_color",
+                "icon_background", "icon_hover_background",
+                "icon_style", "icon_size", "show_search",
+                "show_wishlist", "show_cart", "show_contact",
+            )
+        }),
+        ("Search Bar", {
+            "fields": (
+                "search_placeholder", "search_width",
+                "search_background", "search_text_color",
+                "search_border_color", "search_border_radius",
+            )
+        }),
+        ("Mobile & Status", {
+            "fields": (
+                "mobile_menu_background",
+                "mobile_menu_text_color", "is_active",
+            )
+        }),
+    )
+
+    def has_add_permission(self, request):
+        return not NavbarSettings.objects.exists()
+
+    def has_delete_permission(self, request, obj=None):
+        return False

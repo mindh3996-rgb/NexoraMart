@@ -1,100 +1,476 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Cart</title>
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body>
+{% extends "base.html" %}
+{% load static %}
 
-<div class="container py-5">
+{% block title %}Shopping Cart | Nexora Mart{% endblock %}
 
-    <h2 class="text-center mb-5">
-        🛒 My Shopping Cart
-    </h2>
+{% block content %}
+<style>
+.cart-page{background:#f5f6fa;min-height:75vh;padding:42px 0}
+.cart-panel{background:#fff;border:1px solid #e9eaf0;border-radius:22px;padding:24px}
+.cart-product-img{width:82px;height:82px;object-fit:contain;background:#f7f7fa;border-radius:14px}
+.cart-total{background:#f8f8fc;border:1px solid #ececf4;border-radius:18px;padding:23px}
+.cart-page .form-select{min-width:85px;border-radius:10px}
+.cart-checkout-btn{background:#171923;color:#fff;border:0;transition:.25s}
+.cart-checkout-btn:hover{background:#6d4aff;color:#fff;transform:translateY(-2px)}
+.order-modal-content{background:#15161f;color:#f7f7fc;border:1px solid #ffffff20;border-radius:25px;overflow:hidden;box-shadow:0 25px 90px #0005}
+.order-modal-header{padding:26px 30px;background:linear-gradient(125deg,#29253c,#171820);border-bottom:1px solid #ffffff15}
+.order-brand{font-size:11px;letter-spacing:4px;font-weight:800;color:#b9a5ff}
+.order-modal-body{max-height:70vh;overflow-y:auto;padding:25px}
+.order-section{background:#ffffff07;border:1px solid #ffffff15;border-radius:17px;padding:20px;margin-bottom:20px}
+.order-section h5{font-size:16px;font-weight:750;margin-bottom:18px}
+.order-product-row{display:flex;align-items:center;justify-content:space-between;gap:15px;padding:12px 0;border-bottom:1px solid #ffffff12}
+.order-product-row:last-child{border-bottom:0}
+.order-total{display:flex;justify-content:space-between;gap:12px;padding-top:18px;margin-top:10px;border-top:1px solid #ffffff20;font-size:18px;font-weight:750}
+.order-total strong{color:#c4b5ff}
+.order-modal-content .form-label{color:#dedee9;font-size:13px;font-weight:600}
+.order-input{background:#ffffff0a!important;color:#fff!important;border:1px solid #ffffff25!important;border-radius:11px!important;padding:12px 13px}
+.order-input:focus{border-color:#a78bfa!important;box-shadow:0 0 0 3px #a78bfa22!important}
+.order-input option{background:#20212b;color:white}
+.order-input::placeholder{color:#a7a7b5}
+.payment-box{padding:17px;border:1px solid #a78bfa60;background:#a78bfa0d;border-radius:14px}
+.payment-number{display:block;margin:10px 0;padding:12px;background:#ffffff0b;border-radius:10px;color:#d3c5ff;font-weight:750;overflow-wrap:anywhere}
+.order-modal-footer{padding:20px 25px;border-top:1px solid #ffffff18;background:#171820}
+.order-submit-btn{background:linear-gradient(120deg,#a78bfa,#7044ed);color:white;border:0;font-weight:750;transition:.2s}
+.order-submit-btn:hover{color:white;transform:translateY(-2px);box-shadow:0 8px 25px #7044ed40}
+@media(max-width:767px){.cart-page{padding:25px 0}.cart-panel{padding:12px}.cart-product-img{width:58px;height:58px}.order-modal-header{padding:21px}.order-modal-body{padding:15px}.order-section{padding:15px}.order-modal-footer{padding:15px;gap:8px}.order-modal-footer .btn{font-size:13px;padding:10px}}
+</style>
 
-    <table class="table table-bordered table-hover text-center align-middle">
-
-        <thead class="table-dark">
-            <tr>
-                <th>Image</th>
-                <th>Product</th>
-                <th>Price</th>
-                <th>Quantity</th>
-               <th>Subtotal</th>
-                <th>Action</th>
-            </tr>
-        </thead>
-
-        <tbody>
-
-        {% for item in cart_items %}
-
-        <tr>
-
-            <td>
-                <img src="{{ item.product.image.url }}"
-                     width="80"
-                     height="80"
-                     style="object-fit:contain;">
-            </td>
-
-            <td>{{ item.product.name }}</td>
-
-            <td>Rs{{ item.product.price }}</td>
-
-            <td>
-
-<a href="{% url 'decrease_quantity' item.id %}" 
-class="btn btn-danger btn-sm">
--
-</a>
-
-<span class="mx-2">
-{{ item.quantity }}
-</span>
-
-<a href="{% url 'increase_quantity' item.id %}" 
-class="btn btn-success btn-sm">
-+
-</a>
-
-</td>
-
-        <td>
-    Rs{{ item.subtotal|floatformat:2 }}
-</td>
-<td>
-    <a href="{% url 'remove_from_cart' item.id %}"
-       class="btn btn-danger btn-sm">
-        Remove
-    </a>
-</td>
-
-        </tr>
-
-        {% endfor %}
-
-        </tbody>
-
-    </table>
-
-    <div class="text-end">
-
-        <h3>Total: Rs{{ total }}</h3>
-
+<div class="cart-page">
+  <div class="container">
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+      <div>
+        <h1 class="fw-bold h2 mb-1">Your Shopping Cart</h1>
+        <p class="text-secondary mb-0">Your favourites, ready for delivery.</p>
+      </div>
+      <a href="{% url 'home' %}" class="btn btn-outline-dark rounded-pill px-4">Continue Shopping</a>
     </div>
 
-    <a href="/" class="btn btn-primary mt-3">
-        Continue Shopping
-    </a>
-    <a href="{% url 'checkout' %}" class="btn btn-success mt-3">
-    Proceed to Checkout
-</a>
+    {% if messages %}
+      {% for message in messages %}
+        <div class="alert alert-info alert-dismissible fade show" role="alert">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+      {% endfor %}
+    {% endif %}
 
+    <div class="cart-panel shadow-sm">
+      {% if cart_items %}
+      <div class="table-responsive">
+        <table class="table align-middle">
+          <thead>
+            <tr><th>Product</th><th>Variant</th><th>Price</th><th>Quantity</th><th>Subtotal</th><th></th></tr>
+          </thead>
+          <tbody>
+          {% for item in cart_items %}
+            <tr>
+              <td>
+                <div class="d-flex align-items-center gap-3">
+                  {% if item.product.image %}
+                    <img src="{{ item.product.image.url }}" class="cart-product-img" alt="{{ item.product.name }}">
+                  {% endif %}
+                  <div>
+                    <div class="fw-semibold">{{ item.product.name }}</div>
+                    <small class="text-muted">Product #{{ item.product.id }}</small>
+                  </div>
+                </div>
+              </td>
+              <td>
+                {% if item.variant %}
+                  <div><span class="text-muted">Color:</span> {{ item.variant.color }}</div>
+                  <div><span class="text-muted">Size:</span> {{ item.variant.get_size_display }}</div>
+                {% else %}<span class="text-muted">Standard</span>{% endif %}
+              </td>
+              <td>Rs {{ item.product.price|floatformat:2 }}</td>
+              <td>
+                <div class="d-flex align-items-center gap-2">
+                  <a href="{% url 'decrease_quantity' item.id %}" class="btn btn-outline-secondary btn-sm">−</a>
+                  <span class="fw-semibold">{{ item.quantity }}</span>
+                  <a href="{% url 'increase_quantity' item.id %}" class="btn btn-outline-secondary btn-sm">+</a>
+                </div>
+              </td>
+              <td class="fw-bold">Rs {{ item.subtotal|floatformat:2 }}</td>
+              <td>
+                <a href="{% url 'remove_from_cart' item.id %}" class="btn btn-sm btn-outline-danger"
+                   onclick="return confirm('Remove this product from your cart?')">Remove</a>
+              </td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="row justify-content-end mt-4">
+        <div class="col-lg-5">
+          <div class="cart-total">
+            <div class="d-flex justify-content-between mb-3">
+              <span class="text-secondary">Subtotal</span>
+              <span>Rs {{ total|floatformat:2 }}</span>
+            </div>
+            <hr>
+            <div class="d-flex justify-content-between mb-4">
+              <span class="fw-bold fs-5">Total</span>
+              <span class="fw-bold fs-5">Rs {{ total|floatformat:2 }}</span>
+            </div>
+            <button type="button" class="btn cart-checkout-btn btn-lg w-100 rounded-3"
+                    data-bs-toggle="modal" data-bs-target="#orderModal">
+              Proceed to Order <span class="ms-1">→</span>
+            </button>
+            <p class="small text-muted text-center mt-3 mb-0">Secure checkout · Delivery details required</p>
+          </div>
+        </div>
+      </div>
+      {% else %}
+      <div class="text-center py-5">
+        <div class="display-3 mb-3">🛒</div>
+        <h3 class="fw-bold">Your cart is empty</h3>
+        <p class="text-secondary">Explore our products and find something you love.</p>
+        <a href="{% url 'home' %}" class="btn btn-dark rounded-pill px-4">Shop Now</a>
+      </div>
+      {% endif %}
+    </div>
+  </div>
 </div>
 
-</body>
-</html>
+```html
+{% if cart_items %}
+<div class="modal fade" id="orderModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-xl">
+    <div class="modal-content order-modal-content">
+
+      <div class="order-heading">
+        <span class="order-brand">✦ NEXORA MART</span>
+        <button type="button" class="btn-close btn-close-white"
+                data-bs-dismiss="modal"></button>
+        <h2>Complete Your Order</h2>
+        <p>Premium shopping experience · Secure checkout</p>
+      </div>
+
+      <form method="POST" action="{% url 'checkout' %}"
+            enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <div class="order-layout">
+
+          <!-- LEFT: PRODUCT IMAGE -->
+          <div class="order-image-panel">
+            {% for item in cart_items %}
+              {% if forloop.first %}
+                {% if item.product.image %}
+                  <img src="{{ item.product.image.url }}"
+                       alt="{{ item.product.name }}"
+                       class="order-main-image">
+                {% else %}
+                  <div class="image-placeholder">NEXORA MART</div>
+                {% endif %}
+                <div class="image-product-info">
+                  <span>YOUR SELECTION</span>
+                  <h3>{{ item.product.name }}</h3>
+                  {% if item.variant %}
+                    <p>{{ item.variant.color }} · {{ item.variant.get_size_display }}</p>
+                  {% endif %}
+                  <h4>Rs {{ item.subtotal|floatformat:2 }}</h4>
+                </div>
+              {% endif %}
+            {% endfor %}
+            <div class="image-bottom">✦ PREMIUM QUALITY · EXCLUSIVE STYLE</div>
+          </div>
+
+          <!-- CENTER: DELIVERY AND PAYMENT -->
+          <div class="order-form-panel">
+            <section class="order-section">
+              <h5>01 / Delivery Details</h5>
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label class="form-label">Full Name</label>
+                  <input name="name" class="form-control order-input"
+                         value="{{ request.user.profile.full_name }}" required>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Phone Number</label>
+                  <input type="tel" name="phone" class="form-control order-input"
+                         value="{{ request.user.profile.phone }}" required>
+                </div>
+                <div class="col-12">
+                  <label class="form-label">Delivery Address</label>
+                  <textarea name="address" class="form-control order-input"
+                            rows="2" required>{{ request.user.profile.address }}</textarea>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">City</label>
+                  <input name="city" class="form-control order-input"
+                         value="{{ request.user.profile.city }}" required>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Coupon Code</label>
+                  <input name="coupon" class="form-control order-input"
+                         placeholder="Optional">
+                </div>
+              </div>
+            </section>
+
+            <section class="order-section">
+              <h5>02 / Payment Method</h5>
+              <select name="payment_method" id="cartPaymentMethod"
+                      class="form-select order-input" required>
+                <option value="COD">Cash on Delivery</option>
+                <option value="EASYPAISA">Easypaisa</option>
+                <option value="JAZZCASH">JazzCash</option>
+              </select>
+
+              <div id="cartEasypaisaFields" class="payment-box mt-3" hidden>
+                <strong>Easypaisa Payment</strong>
+                <span class="payment-number">YOUR_EASYPAISA_NUMBER</span>
+                <label class="form-label">Transaction ID</label>
+                <input name="easypaisa_transaction" class="form-control order-input">
+                <label class="form-label mt-2">Payment Screenshot</label>
+                <input type="file" name="easypaisa_screenshot"
+                       class="form-control order-input" accept="image/*">
+              </div>
+
+              <div id="cartJazzcashFields" class="payment-box mt-3" hidden>
+                <strong>JazzCash Payment</strong>
+                <span class="payment-number">YOUR_JAZZCASH_NUMBER</span>
+                <label class="form-label">Transaction ID</label>
+                <input name="jazzcash_transaction" class="form-control order-input">
+                <label class="form-label mt-2">Payment Screenshot</label>
+                <input type="file" name="jazzcash_screenshot"
+                       class="form-control order-input" accept="image/*">
+              </div>
+            </section>
+
+            <div class="order-actions">
+              <button type="button" class="btn continue-btn"
+                      data-bs-dismiss="modal">← Continue Shopping</button>
+              <button type="submit" class="btn order-submit-btn">
+                Place Order&nbsp; →
+              </button>
+            </div>
+          </div>
+
+          <!-- RIGHT: ORDER SUMMARY -->
+          <aside class="order-summary-panel">
+            <h5>03 / Order Summary</h5>
+            {% for item in cart_items %}
+              <div class="summary-product">
+                {% if item.product.image %}
+                  <img src="{{ item.product.image.url }}"
+                       alt="{{ item.product.name }}">
+                {% endif %}
+                <div class="summary-product-info">
+                  <strong>{{ item.product.name }}</strong>
+                  <small>Qty: {{ item.quantity }}</small>
+                  {% if item.variant %}
+                    <small>{{ item.variant.color }} · {{ item.variant.get_size_display }}</small>
+                  {% endif %}
+                  <b>Rs {{ item.subtotal|floatformat:2 }}</b>
+                </div>
+              </div>
+            {% endfor %}
+
+            <div class="summary-line">
+              <span>Subtotal</span><span>Rs {{ total|floatformat:2 }}</span>
+            </div>
+            <div class="summary-line">
+              <span>Delivery</span><span>As applicable</span>
+            </div>
+            <div class="summary-total">
+              <span>Total</span>
+              <strong>Rs {{ total|floatformat:2 }}</strong>
+            </div>
+
+            <div class="secure-note">
+              <span>♧</span>
+              <div><strong>Secure Checkout</strong>
+                <small>Your order details are submitted securely.</small>
+              </div>
+            </div>
+          </aside>
+
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+
+<style>
+#orderModal .modal-dialog{max-width:1450px;width:96%}
+
+.order-modal-content{
+  background:#fff!important;color:#171717;
+  border:1px solid #ddd;border-radius:22px;
+  overflow:hidden;box-shadow:0 30px 100px #0003
+}
+
+.order-heading{
+  position:relative;text-align:center;padding:20px 25px 16px;
+  background:linear-gradient(135deg,#fff,#f2f2f7);
+  border-bottom:1px solid #e5e5e5
+}
+.order-brand{display:block;font-size:11px;letter-spacing:5px;
+  font-weight:800;color:#7044ed}
+.order-heading h2{font-size:clamp(23px,2.5vw,34px);
+  font-weight:800;margin:9px 0 4px;letter-spacing:-.6px;color:#111}
+.order-heading p{color:#666;font-size:12px;margin:0}
+.order-heading .btn-close{position:absolute;right:22px;top:22px}
+
+.order-layout{
+  display:grid;
+  grid-template-columns:minmax(190px,.78fr) minmax(360px,1.45fr) minmax(220px,.85fr);
+  gap:15px;padding:16px;align-items:stretch;
+  max-height:75vh;overflow-y:auto;background:#fff
+}
+
+.order-image-panel,.order-form-panel,.order-summary-panel{
+  min-width:0;border:1px solid #e5e5e5;border-radius:16px;
+  background:#fff!important;color:#171717
+}
+.order-image-panel{
+  position:relative;overflow:hidden;display:flex;flex-direction:column;
+  justify-content:center;min-height:430px;padding:16px
+}
+.order-main-image{width:100%;height:270px;object-fit:contain;
+  filter:none;border-radius:12px}
+.image-placeholder{height:270px;display:grid;place-items:center;color:#777}
+.image-product-info{padding:15px 4px 5px}
+.image-product-info span{font-size:9px;letter-spacing:3px;color:#7044ed}
+.image-product-info h3{font-size:18px;font-weight:750;margin:9px 0;color:#171717}
+.image-product-info p{font-size:12px;color:#666;margin:0 0 8px}
+.image-product-info h4{font-size:21px;font-weight:800;margin:0;color:#171717}
+.image-bottom{font-size:8px;letter-spacing:1.5px;color:#777;margin-top:18px}
+
+.order-form-panel{padding:15px;display:flex;flex-direction:column;gap:13px}
+.order-section{
+  background:#fafafa;border:1px solid #e5e5e5;
+  border-radius:13px;padding:15px;margin:0
+}
+.order-section h5,.order-summary-panel h5{
+  font-size:13px;font-weight:800;letter-spacing:.5px;
+  margin-bottom:14px;color:#171717
+}
+.order-modal-content .form-label{
+  color:#444;font-size:11px;margin-bottom:6px
+}
+.order-input{
+  background:#fff!important;color:#171717!important;
+  border:1px solid #d5d5d5!important;border-radius:9px!important;
+  padding:10px 11px;font-size:12px
+}
+.order-input:focus{
+  border-color:#a78bfa!important;
+  box-shadow:0 0 0 3px #a78bfa25!important
+}
+.order-input::placeholder{color:#888}
+.order-input option{background:#fff!important;color:#171717!important}
+.order-input[type=file]{font-size:10px}
+
+.payment-box{
+  background:#f7f3ff;border:1px solid #d8c9ff;
+  padding:12px;border-radius:10px;font-size:12px;color:#171717
+}
+.payment-number{
+  display:block;color:#7044ed;margin:8px 0;overflow-wrap:anywhere
+}
+
+.order-summary-panel{padding:17px;align-self:start}
+.summary-product{
+  display:flex;gap:10px;padding:12px 0;border-bottom:1px solid #eee
+}
+.summary-product img{
+  width:58px;height:62px;object-fit:contain;
+  background:#f7f7f7;border-radius:8px
+}
+.summary-product-info{
+  min-width:0;display:flex;flex-direction:column;gap:5px
+}
+.summary-product-info strong{font-size:11px;overflow-wrap:anywhere;color:#171717}
+.summary-product-info small{font-size:10px;color:#666}
+.summary-product-info b{font-size:12px;color:#171717;margin-top:3px}
+.summary-line{
+  display:flex;justify-content:space-between;gap:8px;
+  font-size:11px;color:#555;margin-top:15px
+}
+.summary-line span:last-child{text-align:right;color:#171717}
+.summary-total{
+  display:flex;justify-content:space-between;gap:8px;
+  border-top:1px solid #ddd;padding-top:17px;
+  margin-top:16px;font-weight:800;color:#171717
+}
+.summary-total strong{font-size:15px;color:#7044ed;text-align:right}
+.secure-note{
+  display:flex;gap:10px;margin-top:22px;padding:12px;
+  border:1px solid #e5e5e5;border-radius:10px;
+  color:#7044ed;background:#fafafa
+}
+.secure-note div{display:flex;flex-direction:column;gap:5px}
+.secure-note strong{font-size:11px;color:#171717}
+.secure-note small{font-size:10px;color:#666;line-height:1.5}
+
+.order-actions{
+  display:flex;justify-content:space-between;gap:10px;
+  margin-top:auto;padding-top:3px
+}
+.continue-btn{
+  border:1px solid #ccc;color:#333;background:#fff;
+  border-radius:10px;font-size:11px;padding:12px
+}
+.continue-btn:hover{background:#f2f2f2;color:#111}
+.order-submit-btn{
+  background:#171923;color:#fff;border:0;border-radius:10px;
+  font-size:12px;font-weight:800;padding:12px 18px;transition:.2s
+}
+.order-submit-btn:hover{
+  background:#7044ed;color:#fff;transform:translateY(-2px)
+}
+
+@media(max-width:900px){
+  #orderModal .modal-dialog{width:96%;margin:12px auto}
+  .order-layout{
+    grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);
+    max-height:78vh
+  }
+  .order-image-panel{min-height:300px}
+  .order-main-image{height:200px}
+  .order-summary-panel{grid-column:1/-1}
+}
+@media(max-width:600px){
+  .order-layout{grid-template-columns:minmax(0,1fr);padding:10px;gap:10px}
+  .order-image-panel{min-height:0}
+  .order-main-image{height:190px}
+  .order-form-panel{padding:10px}
+  .order-heading{padding:20px 42px 15px}
+  .order-heading h2{font-size:23px}
+  .order-heading .btn-close{right:12px;top:15px}
+  .order-actions{flex-direction:column}
+  .order-actions .btn{width:100%}
+  .order-summary-panel{grid-column:auto}
+}
+</style>
+
+
+<script>
+(function(){
+  const method=document.getElementById("cartPaymentMethod");
+  const easy=document.getElementById("cartEasypaisaFields");
+  const jazz=document.getElementById("cartJazzcashFields");
+  if(!method||!easy||!jazz)return;
+
+  function updatePaymentFields(){
+    easy.hidden=method.value!=="EASYPAISA";
+    jazz.hidden=method.value!=="JAZZCASH";
+    easy.querySelectorAll('input').forEach(input=>{
+      input.required=!easy.hidden;
+    });
+    jazz.querySelectorAll('input').forEach(input=>{
+      input.required=!jazz.hidden;
+    });
+  }
+  method.addEventListener("change",updatePaymentFields);
+  updatePaymentFields();
+})();
+</script>
+{% endif %}
+
+{% endblock %}
