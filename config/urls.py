@@ -122,7 +122,3 @@ path("variants/delete/<int:variant_id>/", views.delete_variant, name="delete_var
 path("dashboard/theme/", views.theme_settings, name="theme_settings"),
 ]
 
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)    
